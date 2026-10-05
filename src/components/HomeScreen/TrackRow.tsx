@@ -7,10 +7,20 @@ export interface TrackRowProps {
   /** The original draws the hairline on every row except the first. */
   showDivider: boolean;
   theme: ThemeMode;
+  /**
+   * Tapping the row makes it the now-playing track.
+   *
+   * The original artifact had a whole gesture layer here — swipe-to-queue,
+   * swipe-to-like, a 500ms long-press action sheet — and the port deliberately
+   * kept the row static. This is the one affordance the harness actually needs
+   * from it: the mini player has nothing to show until something is picked.
+   * A plain `onClick` on the row, the same way Playlist v6's own rows work.
+   */
+  onSelect: (track: Track) => void;
 }
 
 /**
- * One 72px track row, static.
+ * One 72px track row.
  *
  * Original: `function vm({track, idx, isActive, ...})`. Everything that only
  * existed to support a gesture or a playback state is left out on purpose —
@@ -18,7 +28,7 @@ export interface TrackRowProps {
  * `opacity: 0`, the transform was `translateX(0px)`, and the active/playing
  * branches never applied because nothing is playing yet).
  */
-export function TrackRow({ track, showDivider, theme }: TrackRowProps) {
+export function TrackRow({ track, showDivider, theme, onSelect }: TrackRowProps) {
   return (
     <div className={HOME_STATIC.rowGroup}>
       {showDivider && (
@@ -31,7 +41,10 @@ export function TrackRow({ track, showDivider, theme }: TrackRowProps) {
         />
       )}
 
-      <div className={HOME_STATIC.rowShell}>
+      <div
+        className={`${HOME_STATIC.rowShell} cursor-pointer`}
+        onClick={() => onSelect(track)}
+      >
         <div className={`${HOME_STATIC.row} ${HOME_CLASSES[theme].row}`}>
           <div className={HOME_STATIC.cover} style={{ background: track.gradient }}>
             <div className={HOME_STATIC.coverInner}>

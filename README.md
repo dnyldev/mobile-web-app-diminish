@@ -73,7 +73,7 @@ src/
 │   ├── HomeScreen/               the screen from `enterprise-playlist 2.html`
 │   │   ├── HomeScreen.tsx        scroll shell + header + list
 │   │   ├── HomeHeader.tsx        sticky 64px bar + search button
-│   │   ├── TrackRow.tsx          one 72px row, static
+│   │   ├── TrackRow.tsx          one 72px row; tapping it sets now-playing
 │   │   ├── icons.tsx             the header's search glyph
 │   │   └── index.ts
 │   ├── PlaylistV6/               the screen from `Nav-music-playlist.html.html`
@@ -252,10 +252,15 @@ shape as the artifact it replaces, but readable and rebuildable.
     those two right — which is exactly the flaw in the v6 nav's own mini player.
   - **its left half is not a button.** v6's opened the Now Playing sheet; the harness has
     no sheet, and a button with nothing behind it is worse than no button.
-  It shows the first row of the same catalogue `HomeScreen` lists, so no copy is invented.
-  Play/pause and dismiss move local state only — there is no player behind the preview —
-  and dismiss is deliberately not a one-way door: committing a destination brings the pill
-  back, since the harness has no library to re-open one from.
+  **It has a real trigger, and starts absent.** There is no stand-in track: `App` holds
+  `nowPlaying: Track | null`, `HomeScreen` grew an `onSelectTrack` prop, and the row hands
+  the tapped `Track` up. No row tapped → no pill at all. Row tapped → the pill slides in
+  with that track *and* starts playing, which is Playlist v6's own rule
+  (`select → play`). ✕ sets it back to `null`, so dismissing is a real dismissal rather
+  than a one-way door, and tapping another row swaps the pill's contents in place.
+  Play/pause swaps the glyph and nothing else — there is no audio behind this preview, and
+  the pill itself is the only "something is playing" indicator. (The row is a plain
+  `onClick` on a `div`, exactly like v6's rows, so it is not keyboard-reachable.)
 
 ### Playlist v6
 

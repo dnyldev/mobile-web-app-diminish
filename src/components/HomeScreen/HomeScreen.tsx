@@ -1,4 +1,5 @@
 import { HOME_CLASSES, HOME_STATIC, TRACK_LIST } from '@/design/home';
+import type { Track } from '@/data/tracks';
 import { useTracks } from '@/hooks/useTracks';
 import type { ThemeMode } from '@/types/theme';
 import { HomeHeader } from './HomeHeader';
@@ -6,6 +7,11 @@ import { TrackRow } from './TrackRow';
 
 export interface HomeScreenProps {
   theme: ThemeMode;
+  /**
+   * Tapping a row hands the track up to the harness, which is what gives the
+   * mini player something to show. Without it the list is read-only.
+   */
+  onSelectTrack: (track: Track) => void;
 }
 
 /**
@@ -16,7 +22,7 @@ export interface HomeScreenProps {
  * 112px tail padding (`pb-28`) that used to keep the last row clear of the
  * bottom navigation.
  */
-export function HomeScreen({ theme }: HomeScreenProps) {
+export function HomeScreen({ theme, onSelectTrack }: HomeScreenProps) {
   const { status, playlistTitle, tracks, error } = useTracks();
 
   const subtitle =
@@ -43,6 +49,7 @@ export function HomeScreen({ theme }: HomeScreenProps) {
                 track={track}
                 showDivider={index !== 0}
                 theme={theme}
+                onSelect={onSelectTrack}
               />
             ))}
           </div>

@@ -8,8 +8,8 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 import { ViewSwitch, type HarnessView } from '@/components/ViewSwitch';
 import { HARNESS_CLASSES, HARNESS_STATIC } from '@/design/theme';
 import { DEFAULT_ACTIVE_ID } from '@/design/tokens';
+import type { Track } from '@/data/tracks';
 import { useThemeMode } from '@/hooks/useThemeMode';
-import { useTracks } from '@/hooks/useTracks';
 import type { NavId } from '@/types/theme';
 
 /**
@@ -35,12 +35,15 @@ export default function App() {
   const [activeId, setActiveId] = useState<NavId>(DEFAULT_ACTIVE_ID);
   const [counter, setCounter] = useState(0);
 
-  // The harness's now-playing is the first row of the catalogue HomeScreen lists,
-  // so the mini player never shows invented copy. Nothing is playing behind it —
-  // play/pause and dismiss move local state only.
-  const { status, tracks } = useTracks();
-  const nowPlaying = status === 'ready' ? tracks[0] : undefined;
-  const [miniVisible, setMiniVisible] = useState(true);
+  /**
+   * Nothing is playing until a row is tapped.
+   *
+   * The mini player IS the harness's now-playing indicator, so it starts absent
+   * rather than pinned to a stand-in track: absent → tap a row → it slides up →
+   * ✕ puts it back to absent. `playing` is the only thing the transport moves, and
+   * it is display-only — there is no audio behind this preview.
+   */
+  const [nowPlaying, setNowPlaying] = useState<Track | null>(null);
   const [playing, setPlaying] = useState(true);
 
   // The original bumped its press counter on every commit, whether that came
@@ -48,10 +51,12 @@ export default function App() {
   const handleSelect = useCallback((id: NavId) => {
     setActiveId(id);
     setCounter((value) => value + 1);
-    // Committing a destination also un-dismisses the mini player: the harness has
-    // no library to re-open one from, so the dismiss button must not be a
-    // one-way door.
-    setMiniVisible(true);
+  }, []);
+
+  /** Original v6: tapping a row selects it *and* starts it playing. */
+  const handleSelectTrack = useCallback((track: Track) => {
+    setNowPlaying(track);
+    setPlaying(true);
   }, []);
 
   const isHome = activeId === 'home';
@@ -65,7 +70,7 @@ export default function App() {
         ) : (
           <>
             {isHome ? (
-              <HomeScreen theme={mode} />
+              <HomeScreen theme={mode} onSelectTrack={handleSelectTrack} />
             ) : (
               <NavPreviewLabel activeId={activeId} counter={counter} theme={mode} />
             )}
@@ -82,13 +87,13 @@ export default function App() {
                  beside it, so the two pills share one stack and one safe-area
                  offset — they cannot drift apart. */
               above={
-                nowPlaying && miniVisible ? (
+                nowPlaying ? (
                   <MiniPlayer
                     track={nowPlaying}
                     isPlaying={playing}
                     theme={mode}
                     onTogglePlay={() => setPlaying((value) => !value)}
-                    onClose={() => setMiniVisible(false)}
+                    onClose={() => setNowPlaying(null)}
                   />
                 ) : null
               }
