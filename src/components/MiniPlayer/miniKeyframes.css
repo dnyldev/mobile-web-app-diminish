@@ -1,0 +1,16 @@
+/*
+ * Owned by MiniPlayer — the harness's entry animation for the pill above the nav.
+ *
+ * Playlist v6 slid its own mini player in with a `slideUp` keyframe that baked in
+ * `translate(-50%)`, because that pill centred itself with a transform. Here the
+ * centring belongs to `mx-auto` on the pill and is inherited from the stack, so
+ * the keyframe is a plain `translateY` and the two can never fight.
+ *
+ * No `prefers-reduced-motion` block is needed: `BottomNav/navKeyframes.css`
+ * already carries the document-wide one.
+ */
+
+@keyframes miniPlayerIn {
+  from { transform: translateY(16px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}

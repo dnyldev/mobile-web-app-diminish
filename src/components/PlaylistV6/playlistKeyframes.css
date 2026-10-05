@@ -1,0 +1,29 @@
+/*
+ * Owned by PlaylistV6. Extracted verbatim from the `<style>` element the
+ * original component rendered into its own tree.
+ *
+ * The original block was:
+ *
+ *   @import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&display=swap');
+ *   *{font-family:'Geist',system-ui,sans-serif}
+ *   @keyframes slideUp { … }
+ *   @keyframes sheetUp { … }
+ *
+ * The two lines above the keyframes are NOT here:
+ *   - the `@import` pulled a font off fonts.googleapis.com, which breaks the
+ *     offline requirement — the same face is now bundled (`styles/index.css`
+ *     carries the `@font-face`, `src/assets/fonts/geist-*.woff2` the files);
+ *   - the `*{font-family:…}` rule is applied as `V6_COPY.rootFontFamily` on the
+ *     screen root instead (font-family is inherited, so it is equivalent).
+ * The keyframes are byte-for-byte the original text.
+ */
+
+@keyframes slideUp {
+  from { transform: translate(-50%, 24px); opacity: 0; }
+  to { transform: translate(-50%, 0); opacity: 1; }
+}
+
+@keyframes sheetUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}

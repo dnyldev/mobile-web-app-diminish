@@ -1,0 +1,7 @@
+{
+  "composed": {},
+  "deviations": {
+    "min-h-screen": "dropped from the Playlist v6 root on purpose. The original WAS the document, so min-height:100vh cost nothing; this port lives inside the harness's fixed-height phone frame, where the same rule makes the root taller than the frame (which is overflow-hidden) and drags the absolutely-positioned nav pill past the bottom edge — the nav would simply disappear. The frame supplies the height instead. Nothing else about the root changes: it keeps bg-[#F6F6F7] text-zinc-900 selection:bg-zinc-900 selection:text-white antialiased."
+  },
+  "reason": "Playlist v6 (../Nav-music-playlist.html.html). Exactly ONE class token is dropped, listed above; the numeric literal set is complete. The rest of the port's structural changes are not lexical and so never reach this pass: the document scroll became the screen's own scroll shell, and the four `fixed` layers (nav, mini player, sheet backdrop, sheet panel) became `absolute` — the token `fixed` carries no `-`, `:` or `[`, so class_like() never collected it in the first place. The Geist `@import` from fonts.googleapis.com is gone because it breaks the offline requirement; the face is bundled in src/assets/fonts/ and declared in styles/index.css."
+}

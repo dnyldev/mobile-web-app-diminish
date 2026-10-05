@@ -1,0 +1,31 @@
+{
+  "name": "diminish",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Modular, offline-first rebuild of the diminish bottom-nav artifact (React 18.3.1 / liquid glass).",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "check:parity": "python3 tools/parity_check.py",
+    "artifact:split": "python3 tools/split_artifact.py \"../diminish.html\" _extract",
+    "artifact:format": "python3 tools/jsformat2.py _extract/script-01.js _extract/script-01.fmt2.js"
+  },
+  "dependencies": {
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.17",
+    "typescript": "~5.6.3",
+    "vite": "^5.4.11",
+    "vite-plugin-singlefile": "^2.0.3"
+  }
+}

@@ -1,0 +1,66 @@
+import type { Track } from '@/data/tracks';
+import { HOME_CLASSES, HOME_STATIC, HOME_COLORS, TRACK_LIST } from '@/design/home';
+import type { ThemeMode } from '@/types/theme';
+
+export interface TrackRowProps {
+  track: Track;
+  /** The original draws the hairline on every row except the first. */
+  showDivider: boolean;
+  theme: ThemeMode;
+}
+
+/**
+ * One 72px track row, static.
+ *
+ * Original: `function vm({track, idx, isActive, ...})`. Everything that only
+ * existed to support a gesture or a playback state is left out on purpose —
+ * at rest the original rendered exactly what is below (the swipe layers were
+ * `opacity: 0`, the transform was `translateX(0px)`, and the active/playing
+ * branches never applied because nothing is playing yet).
+ */
+export function TrackRow({ track, showDivider, theme }: TrackRowProps) {
+  return (
+    <div className={HOME_STATIC.rowGroup}>
+      {showDivider && (
+        <div
+          className={HOME_STATIC.divider}
+          style={{
+            marginLeft: TRACK_LIST.dividerInset,
+            backgroundColor: HOME_COLORS[theme].divider,
+          }}
+        />
+      )}
+
+      <div className={HOME_STATIC.rowShell}>
+        <div className={`${HOME_STATIC.row} ${HOME_CLASSES[theme].row}`}>
+          <div className={HOME_STATIC.cover} style={{ background: track.gradient }}>
+            <div className={HOME_STATIC.coverInner}>
+              <span className={HOME_STATIC.letter}>{track.letter}</span>
+            </div>
+          </div>
+
+          <div className={HOME_STATIC.textBlock}>
+            <div className={`${HOME_STATIC.trackTitle} ${HOME_CLASSES[theme].trackTitle}`}>
+              {track.title}
+            </div>
+            <div className={`${HOME_STATIC.trackArtist} ${HOME_CLASSES[theme].trackArtist}`}>
+              {track.artist}
+            </div>
+          </div>
+
+          <div className={HOME_STATIC.metaRow}>
+            <span
+              className={HOME_STATIC.duration}
+              style={{
+                fontFamily: TRACK_LIST.durationFontFamily,
+                color: HOME_COLORS[theme].duration,
+              }}
+            >
+              {track.duration}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,561 @@
+{
+  "_comment": "Demo catalogue for the Home list — same numbers the original artifact generated inline: seconds = 138 + (n*37 % 173), artist = artists[n % 25], gradient = gradients[n % 12]. Replace this file (or the loader's URL) with real data; no component needs to change.",
+  "playlist": {
+    "title": "Library"
+  },
+  "tracks": [
+    {
+      "id": 1,
+      "title": "sang",
+      "artist": "mojtaba daghighy",
+      "seconds": 138,
+      "gradient": "linear-gradient(135deg,#3f3f46 0%,#18181b 55%,#09090b 100%)"
+    },
+    {
+      "id": 2,
+      "title": "mamnoon",
+      "artist": "shadmehr aghili",
+      "seconds": 175,
+      "gradient": "linear-gradient(135deg,#be123c 0%,#881337 55%,#4c0519 100%)"
+    },
+    {
+      "id": 3,
+      "title": "pooste shir",
+      "artist": "ebi",
+      "seconds": 212,
+      "gradient": "linear-gradient(135deg,#991b1b 0%,#7c2d12 100%)"
+    },
+    {
+      "id": 4,
+      "title": "mamnoonam",
+      "artist": "saman jalili",
+      "seconds": 249,
+      "gradient": "linear-gradient(135deg,#065f46 0%,#022c22 50%,#111111 100%)"
+    },
+    {
+      "id": 5,
+      "title": "ghaf",
+      "artist": "alireza talischi",
+      "seconds": 286,
+      "gradient": "linear-gradient(135deg,#166534 0%,#052e16 100%)"
+    },
+    {
+      "id": 6,
+      "title": "roze sefid",
+      "artist": "haamim",
+      "seconds": 150,
+      "gradient": "linear-gradient(135deg,#27272a 0%,#000000 100%)"
+    },
+    {
+      "id": 7,
+      "title": "khooneye arezoo",
+      "artist": "moein",
+      "seconds": 187,
+      "gradient": "linear-gradient(135deg,#78716c 0%,#1c1917 100%)"
+    },
+    {
+      "id": 8,
+      "title": "parvaze ghooha",
+      "artist": "alireza ghorbani",
+      "seconds": 224,
+      "gradient": "linear-gradient(135deg,#1e293b 0%,#0f172a 100%)"
+    },
+    {
+      "id": 9,
+      "title": "betars",
+      "artist": "mohsen yegane",
+      "seconds": 261,
+      "gradient": "linear-gradient(135deg,#262626 0%,#0a0a0a 100%)"
+    },
+    {
+      "id": 10,
+      "title": "midnight drift",
+      "artist": "arctic tones",
+      "seconds": 298,
+      "gradient": "linear-gradient(135deg,#4a044e 0%,#19011a 100%)"
+    },
+    {
+      "id": 11,
+      "title": "neon pulse",
+      "artist": "nova lane",
+      "seconds": 162,
+      "gradient": "linear-gradient(135deg,#0c4a6e 0%,#082f49 100%)"
+    },
+    {
+      "id": 12,
+      "title": "amber haze",
+      "artist": "lumen field",
+      "seconds": 199,
+      "gradient": "linear-gradient(135deg,#365314 0%,#1a2e05 100%)"
+    },
+    {
+      "id": 13,
+      "title": "cold river",
+      "artist": "atlas club",
+      "seconds": 236,
+      "gradient": "linear-gradient(135deg,#3f3f46 0%,#18181b 55%,#09090b 100%)"
+    },
+    {
+      "id": 14,
+      "title": "velvet morning",
+      "artist": "velvet cove",
+      "seconds": 273,
+      "gradient": "linear-gradient(135deg,#be123c 0%,#881337 55%,#4c0519 100%)"
+    },
+    {
+      "id": 15,
+      "title": "static love",
+      "artist": "solaris",
+      "seconds": 310,
+      "gradient": "linear-gradient(135deg,#991b1b 0%,#7c2d12 100%)"
+    },
+    {
+      "id": 16,
+      "title": "afterglow",
+      "artist": "kairo",
+      "seconds": 174,
+      "gradient": "linear-gradient(135deg,#065f46 0%,#022c22 50%,#111111 100%)"
+    },
+    {
+      "id": 17,
+      "title": "paper planes",
+      "artist": "halo drift",
+      "seconds": 211,
+      "gradient": "linear-gradient(135deg,#166534 0%,#052e16 100%)"
+    },
+    {
+      "id": 18,
+      "title": "hollow nights",
+      "artist": "cerulean",
+      "seconds": 248,
+      "gradient": "linear-gradient(135deg,#27272a 0%,#000000 100%)"
+    },
+    {
+      "id": 19,
+      "title": "iron sky",
+      "artist": "opal",
+      "seconds": 285,
+      "gradient": "linear-gradient(135deg,#78716c 0%,#1c1917 100%)"
+    },
+    {
+      "id": 20,
+      "title": "lumen",
+      "artist": "thicket",
+      "seconds": 149,
+      "gradient": "linear-gradient(135deg,#1e293b 0%,#0f172a 100%)"
+    },
+    {
+      "id": 21,
+      "title": "echoes",
+      "artist": "boreal",
+      "seconds": 186,
+      "gradient": "linear-gradient(135deg,#262626 0%,#0a0a0a 100%)"
+    },
+    {
+      "id": 22,
+      "title": "mercury retro",
+      "artist": "sora bloom",
+      "seconds": 223,
+      "gradient": "linear-gradient(135deg,#4a044e 0%,#19011a 100%)"
+    },
+    {
+      "id": 23,
+      "title": "saffron",
+      "artist": "aether",
+      "seconds": 260,
+      "gradient": "linear-gradient(135deg,#0c4a6e 0%,#082f49 100%)"
+    },
+    {
+      "id": 24,
+      "title": "lone signal",
+      "artist": "midnight society",
+      "seconds": 297,
+      "gradient": "linear-gradient(135deg,#365314 0%,#1a2e05 100%)"
+    },
+    {
+      "id": 25,
+      "title": "crystal",
+      "artist": "neon veil",
+      "seconds": 161,
+      "gradient": "linear-gradient(135deg,#3f3f46 0%,#18181b 55%,#09090b 100%)"
+    },
+    {
+      "id": 26,
+      "title": "north",
+      "artist": "mojtaba daghighy",
+      "seconds": 198,
+      "gradient": "linear-gradient(135deg,#be123c 0%,#881337 55%,#4c0519 100%)"
+    },
+    {
+      "id": 27,
+      "title": "arcade",
+      "artist": "shadmehr aghili",
+      "seconds": 235,
+      "gradient": "linear-gradient(135deg,#991b1b 0%,#7c2d12 100%)"
+    },
+    {
+      "id": 28,
+      "title": "silhouette",
+      "artist": "ebi",
+      "seconds": 272,
+      "gradient": "linear-gradient(135deg,#065f46 0%,#022c22 50%,#111111 100%)"
+    },
+    {
+      "id": 29,
+      "title": "parallax",
+      "artist": "saman jalili",
+      "seconds": 309,
+      "gradient": "linear-gradient(135deg,#166534 0%,#052e16 100%)"
+    },
+    {
+      "id": 30,
+      "title": "void",
+      "artist": "alireza talischi",
+      "seconds": 173,
+      "gradient": "linear-gradient(135deg,#27272a 0%,#000000 100%)"
+    },
+    {
+      "id": 31,
+      "title": "atlas",
+      "artist": "haamim",
+      "seconds": 210,
+      "gradient": "linear-gradient(135deg,#78716c 0%,#1c1917 100%)"
+    },
+    {
+      "id": 32,
+      "title": "cinder",
+      "artist": "moein",
+      "seconds": 247,
+      "gradient": "linear-gradient(135deg,#1e293b 0%,#0f172a 100%)"
+    },
+    {
+      "id": 33,
+      "title": "nova",
+      "artist": "alireza ghorbani",
+      "seconds": 284,
+      "gradient": "linear-gradient(135deg,#262626 0%,#0a0a0a 100%)"
+    },
+    {
+      "id": 34,
+      "title": "obsidian",
+      "artist": "mohsen yegane",
+      "seconds": 148,
+      "gradient": "linear-gradient(135deg,#4a044e 0%,#19011a 100%)"
+    },
+    {
+      "id": 35,
+      "title": "halcyon",
+      "artist": "arctic tones",
+      "seconds": 185,
+      "gradient": "linear-gradient(135deg,#0c4a6e 0%,#082f49 100%)"
+    },
+    {
+      "id": 36,
+      "title": "driftwood",
+      "artist": "nova lane",
+      "seconds": 222,
+      "gradient": "linear-gradient(135deg,#365314 0%,#1a2e05 100%)"
+    },
+    {
+      "id": 37,
+      "title": "kinetic",
+      "artist": "lumen field",
+      "seconds": 259,
+      "gradient": "linear-gradient(135deg,#3f3f46 0%,#18181b 55%,#09090b 100%)"
+    },
+    {
+      "id": 38,
+      "title": "moire",
+      "artist": "atlas club",
+      "seconds": 296,
+      "gradient": "linear-gradient(135deg,#be123c 0%,#881337 55%,#4c0519 100%)"
+    },
+    {
+      "id": 39,
+      "title": "solar",
+      "artist": "velvet cove",
+      "seconds": 160,
+      "gradient": "linear-gradient(135deg,#991b1b 0%,#7c2d12 100%)"
+    },
+    {
+      "id": 40,
+      "title": "lucid",
+      "artist": "solaris",
+      "seconds": 197,
+      "gradient": "linear-gradient(135deg,#065f46 0%,#022c22 50%,#111111 100%)"
+    },
+    {
+      "id": 41,
+      "title": "cerulean",
+      "artist": "kairo",
+      "seconds": 234,
+      "gradient": "linear-gradient(135deg,#166534 0%,#052e16 100%)"
+    },
+    {
+      "id": 42,
+      "title": "monolith",
+      "artist": "halo drift",
+      "seconds": 271,
+      "gradient": "linear-gradient(135deg,#27272a 0%,#000000 100%)"
+    },
+    {
+      "id": 43,
+      "title": "oxide",
+      "artist": "cerulean",
+      "seconds": 308,
+      "gradient": "linear-gradient(135deg,#78716c 0%,#1c1917 100%)"
+    },
+    {
+      "id": 44,
+      "title": "quartz",
+      "artist": "opal",
+      "seconds": 172,
+      "gradient": "linear-gradient(135deg,#1e293b 0%,#0f172a 100%)"
+    },
+    {
+      "id": 45,
+      "title": "cascade",
+      "artist": "thicket",
+      "seconds": 209,
+      "gradient": "linear-gradient(135deg,#262626 0%,#0a0a0a 100%)"
+    },
+    {
+      "id": 46,
+      "title": "horizon",
+      "artist": "boreal",
+      "seconds": 246,
+      "gradient": "linear-gradient(135deg,#4a044e 0%,#19011a 100%)"
+    },
+    {
+      "id": 47,
+      "title": "nimbus",
+      "artist": "sora bloom",
+      "seconds": 283,
+      "gradient": "linear-gradient(135deg,#0c4a6e 0%,#082f49 100%)"
+    },
+    {
+      "id": 48,
+      "title": "sora",
+      "artist": "aether",
+      "seconds": 147,
+      "gradient": "linear-gradient(135deg,#365314 0%,#1a2e05 100%)"
+    },
+    {
+      "id": 49,
+      "title": "helios",
+      "artist": "midnight society",
+      "seconds": 184,
+      "gradient": "linear-gradient(135deg,#3f3f46 0%,#18181b 55%,#09090b 100%)"
+    },
+    {
+      "id": 50,
+      "title": "aether",
+      "artist": "neon veil",
+      "seconds": 221,
+      "gradient": "linear-gradient(135deg,#be123c 0%,#881337 55%,#4c0519 100%)"
+    },
+    {
+      "id": 51,
+      "title": "vanta",
+      "artist": "mojtaba daghighy",
+      "seconds": 258,
+      "gradient": "linear-gradient(135deg,#991b1b 0%,#7c2d12 100%)"
+    },
+    {
+      "id": 52,
+      "title": "lattice",
+      "artist": "shadmehr aghili",
+      "seconds": 295,
+      "gradient": "linear-gradient(135deg,#065f46 0%,#022c22 50%,#111111 100%)"
+    },
+    {
+      "id": 53,
+      "title": "prism",
+      "artist": "ebi",
+      "seconds": 159,
+      "gradient": "linear-gradient(135deg,#166534 0%,#052e16 100%)"
+    },
+    {
+      "id": 54,
+      "title": "umbra",
+      "artist": "saman jalili",
+      "seconds": 196,
+      "gradient": "linear-gradient(135deg,#27272a 0%,#000000 100%)"
+    },
+    {
+      "id": 55,
+      "title": "kairo",
+      "artist": "alireza talischi",
+      "seconds": 233,
+      "gradient": "linear-gradient(135deg,#78716c 0%,#1c1917 100%)"
+    },
+    {
+      "id": 56,
+      "title": "tide",
+      "artist": "haamim",
+      "seconds": 270,
+      "gradient": "linear-gradient(135deg,#1e293b 0%,#0f172a 100%)"
+    },
+    {
+      "id": 57,
+      "title": "fracture",
+      "artist": "moein",
+      "seconds": 307,
+      "gradient": "linear-gradient(135deg,#262626 0%,#0a0a0a 100%)"
+    },
+    {
+      "id": 58,
+      "title": "orbit",
+      "artist": "alireza ghorbani",
+      "seconds": 171,
+      "gradient": "linear-gradient(135deg,#4a044e 0%,#19011a 100%)"
+    },
+    {
+      "id": 59,
+      "title": "ion",
+      "artist": "mohsen yegane",
+      "seconds": 208,
+      "gradient": "linear-gradient(135deg,#0c4a6e 0%,#082f49 100%)"
+    },
+    {
+      "id": 60,
+      "title": "pulse",
+      "artist": "arctic tones",
+      "seconds": 245,
+      "gradient": "linear-gradient(135deg,#365314 0%,#1a2e05 100%)"
+    },
+    {
+      "id": 61,
+      "title": "sable",
+      "artist": "nova lane",
+      "seconds": 282,
+      "gradient": "linear-gradient(135deg,#3f3f46 0%,#18181b 55%,#09090b 100%)"
+    },
+    {
+      "id": 62,
+      "title": "wren",
+      "artist": "lumen field",
+      "seconds": 146,
+      "gradient": "linear-gradient(135deg,#be123c 0%,#881337 55%,#4c0519 100%)"
+    },
+    {
+      "id": 63,
+      "title": "cobalt",
+      "artist": "atlas club",
+      "seconds": 183,
+      "gradient": "linear-gradient(135deg,#991b1b 0%,#7c2d12 100%)"
+    },
+    {
+      "id": 64,
+      "title": "ember",
+      "artist": "velvet cove",
+      "seconds": 220,
+      "gradient": "linear-gradient(135deg,#065f46 0%,#022c22 50%,#111111 100%)"
+    },
+    {
+      "id": 65,
+      "title": "flint",
+      "artist": "solaris",
+      "seconds": 257,
+      "gradient": "linear-gradient(135deg,#166534 0%,#052e16 100%)"
+    },
+    {
+      "id": 66,
+      "title": "dusk",
+      "artist": "kairo",
+      "seconds": 294,
+      "gradient": "linear-gradient(135deg,#27272a 0%,#000000 100%)"
+    },
+    {
+      "id": 67,
+      "title": "aurora",
+      "artist": "halo drift",
+      "seconds": 158,
+      "gradient": "linear-gradient(135deg,#78716c 0%,#1c1917 100%)"
+    },
+    {
+      "id": 68,
+      "title": "yara",
+      "artist": "cerulean",
+      "seconds": 195,
+      "gradient": "linear-gradient(135deg,#1e293b 0%,#0f172a 100%)"
+    },
+    {
+      "id": 69,
+      "title": "meridian",
+      "artist": "opal",
+      "seconds": 232,
+      "gradient": "linear-gradient(135deg,#262626 0%,#0a0a0a 100%)"
+    },
+    {
+      "id": 70,
+      "title": "zenith",
+      "artist": "thicket",
+      "seconds": 269,
+      "gradient": "linear-gradient(135deg,#4a044e 0%,#19011a 100%)"
+    },
+    {
+      "id": 71,
+      "title": "solace",
+      "artist": "boreal",
+      "seconds": 306,
+      "gradient": "linear-gradient(135deg,#0c4a6e 0%,#082f49 100%)"
+    },
+    {
+      "id": 72,
+      "title": "vertex",
+      "artist": "sora bloom",
+      "seconds": 170,
+      "gradient": "linear-gradient(135deg,#365314 0%,#1a2e05 100%)"
+    },
+    {
+      "id": 73,
+      "title": "lunar",
+      "artist": "aether",
+      "seconds": 207,
+      "gradient": "linear-gradient(135deg,#3f3f46 0%,#18181b 55%,#09090b 100%)"
+    },
+    {
+      "id": 74,
+      "title": "opal",
+      "artist": "midnight society",
+      "seconds": 244,
+      "gradient": "linear-gradient(135deg,#be123c 0%,#881337 55%,#4c0519 100%)"
+    },
+    {
+      "id": 75,
+      "title": "thicket",
+      "artist": "neon veil",
+      "seconds": 281,
+      "gradient": "linear-gradient(135deg,#991b1b 0%,#7c2d12 100%)"
+    },
+    {
+      "id": 76,
+      "title": "boreal",
+      "artist": "mojtaba daghighy",
+      "seconds": 145,
+      "gradient": "linear-gradient(135deg,#065f46 0%,#022c22 50%,#111111 100%)"
+    },
+    {
+      "id": 77,
+      "title": "strata",
+      "artist": "shadmehr aghili",
+      "seconds": 182,
+      "gradient": "linear-gradient(135deg,#166534 0%,#052e16 100%)"
+    },
+    {
+      "id": 78,
+      "title": "quill",
+      "artist": "ebi",
+      "seconds": 219,
+      "gradient": "linear-gradient(135deg,#27272a 0%,#000000 100%)"
+    },
+    {
+      "id": 79,
+      "title": "vessel",
+      "artist": "saman jalili",
+      "seconds": 256,
+      "gradient": "linear-gradient(135deg,#78716c 0%,#1c1917 100%)"
+    }
+  ]
+}
