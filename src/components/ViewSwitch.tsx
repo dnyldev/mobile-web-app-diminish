@@ -46,7 +46,7 @@ export function ViewSwitch({ view, onChange }: ViewSwitchProps) {
   }, [view, onChange]);
 
   return (
-    <div className="fixed top-4 left-4 z-[100]">
+    <div className="fixed bottom-4 right-4 z-[100] opacity-60 hover:opacity-100 transition-opacity">
       <div
         className="flex items-center gap-1 p-1 rounded-full bg-white/80 border border-black/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.12)]"
         style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}
@@ -68,7 +68,7 @@ export function ViewSwitch({ view, onChange }: ViewSwitchProps) {
           );
         })}
       </div>
-      <p className="mt-1 ml-2 text-[10px] font-medium tracking-widest text-zinc-400 uppercase">
+      <p className="mt-1 mr-2 text-right text-[10px] font-medium tracking-widest text-zinc-400 uppercase">
         press v
       </p>
     </div>

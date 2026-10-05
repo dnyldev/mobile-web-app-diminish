@@ -5,3 +5,5 @@ __pycache__/
 *.pyc
 *.local
 .DS_Store
+# throwaway lab — never committed, deleted once its result moves into src/
+sandbox/

@@ -12,6 +12,8 @@ export interface HomeHeaderProps {
    */
   subtitle: string;
   theme: ThemeMode;
+  /** دکمه آیکن-only که با اسکرول می‌آید توی هدر کنار سرچ */
+  aside?: React.ReactNode;
 }
 
 /**
@@ -19,7 +21,7 @@ export interface HomeHeaderProps {
  * button (that only opened the sidebar, which is out of scope). The search
  * button in the corner is kept; wiring it up is the next step.
  */
-export function HomeHeader({ title, subtitle, theme }: HomeHeaderProps) {
+export function HomeHeader({ title, subtitle, theme, aside }: HomeHeaderProps) {
   return (
     <header className={`${HOME_STATIC.headerBar} ${HOME_CLASSES[theme].headerBar}`}>
       <div className={HOME_STATIC.headerLeft}>
@@ -31,13 +33,16 @@ export function HomeHeader({ title, subtitle, theme }: HomeHeaderProps) {
         </div>
       </div>
 
-      <button
-        type="button"
-        aria-label="search"
-        className={`${HOME_STATIC.searchButton} ${HOME_CLASSES[theme].searchButton}`}
-      >
-        <SearchGlyph size={18} />
-      </button>
+      <div className="flex items-center gap-2">
+        {aside}
+        <button
+          type="button"
+          aria-label="search"
+          className={`${HOME_STATIC.searchButton} ${HOME_CLASSES[theme].searchButton}`}
+        >
+          <SearchGlyph size={18} />
+        </button>
+      </div>
     </header>
   );
 }

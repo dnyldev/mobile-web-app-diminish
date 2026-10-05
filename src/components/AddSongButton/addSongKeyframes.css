@@ -1,0 +1,5 @@
+/* shimmerMove — verbatim from Add music.html (_extract-add-music/app.source.js:245) */
+@keyframes shimmerMove {
+  0% { transform: translateX(-100%) }
+  100% { transform: translateX(200%) }
+}

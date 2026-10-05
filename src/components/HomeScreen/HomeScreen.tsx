@@ -1,6 +1,9 @@
+import { useRef } from 'react';
 import { HOME_CLASSES, HOME_STATIC, TRACK_LIST } from '@/design/home';
 import type { Track } from '@/data/tracks';
 import { useTracks } from '@/hooks/useTracks';
+import { useScrollCompact } from '@/hooks/useScrollCompact';
+import { AddSongDocked, AddSongDropBox } from '@/components/AddSongButton';
 import type { ThemeMode } from '@/types/theme';
 import { HomeHeader } from './HomeHeader';
 import { TrackRow } from './TrackRow';
@@ -24,6 +27,9 @@ export interface HomeScreenProps {
  */
 export function HomeScreen({ theme, onSelectTrack }: HomeScreenProps) {
   const { status, playlistTitle, tracks, error } = useTracks();
+  // ADD-SONG-TRY: الگوی ساده استاندارد — دکمه با محتوا اسکرول می‌شود، آیکن هدر کراس‌فید می‌آید.
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  const compact = useScrollCompact(scrollerRef, { compactAt: 80, expandAt: 40 });
 
   const subtitle =
     status === 'ready'
@@ -34,11 +40,27 @@ export function HomeScreen({ theme, onSelectTrack }: HomeScreenProps) {
 
   return (
     <div
+      ref={scrollerRef}
       className={HOME_STATIC.scroller}
       style={{ fontFamily: TRACK_LIST.rootFontFamily }}
       data-status={status}
     >
-      <HomeHeader title={playlistTitle || 'Playlist'} subtitle={subtitle} theme={theme} />
+      <HomeHeader
+        title={playlistTitle || 'Playlist'}
+        subtitle={subtitle}
+        theme={theme}
+        aside={<AddSongDocked theme={theme} visible={compact} onClick={() => {}} />}
+      />
+      {/* ADD-SONG-TRY: دکمه در جریان محتوا — ساده، مثل Spotify/Apple */}
+      <div
+        className={`transition-all duration-300 overflow-hidden ${
+          compact ? 'opacity-0 max-h-0' : 'opacity-100 max-h-[200px]'
+        }`}
+      >
+        <div className="px-4 sm:px-6 pt-3">
+          <AddSongDropBox theme={theme} onClick={() => {}} />
+        </div>
+      </div>
 
       <main className={HOME_STATIC.main}>
         {status === 'ready' && (
