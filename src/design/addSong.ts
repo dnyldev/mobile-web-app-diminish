@@ -95,11 +95,9 @@ export const ADD_SONG_METRICS = {
    *                   stops. A blank query clears the list immediately;
    *                   anything else puts the three skeletons up for 600ms.
    *   the autofocus   100ms after the view opens (`setTimeout(() => v.current?.focus(), 100)`)
-   *   the chips       `Ie = rl.filter(m => m.trending).slice(0, 5)`
    */
   searchDebounceMs: 600,
   searchFocusDelayMs: 100,
-  searchTrendingCount: 5,
   /** the skeleton rows while the debounce runs: `[1,2,3].map(…)` */
   searchSkeletonCount: 3,
   /** a result row: inline `height: "72px"` */
@@ -263,18 +261,17 @@ export const ADD_SONG_CLASS = {
   searchEmptyDisc: 'w-[72px] h-[72px] rounded-full flex items-center justify-center mb-5',
   /** `text-[16px] font-medium mb-1` */
   searchEmptyTitle: 'text-[16px] font-medium mb-1',
-  /** `text-[13.5px] mb-8` */
-  searchEmptySub: 'text-[13.5px] mb-8',
-  /** the trending block: `w-full`, its label `text-[13px] font-semibold tracking-wide uppercase mb-3` */
-  searchTrending: 'w-full',
-  searchTrendingLabel: 'text-[13px] font-semibold tracking-wide uppercase mb-3',
-  /** its chips: `flex flex-wrap gap-2` */
-  searchChips: 'flex flex-wrap gap-2',
-  /** a track chip: `px-4 h-8 rounded-full text-[14px] font-medium active:scale-95 transition-transform` */
-  searchChipTrack:
-    'px-4 h-8 rounded-full text-[14px] font-medium active:scale-95 transition-transform',
-  /** an artist chip: `px-4 h-8 rounded-full text-[14px] font-medium active:scale-95 transition` */
-  searchChipArtist: 'px-4 h-8 rounded-full text-[14px] font-medium active:scale-95 transition',
+  /** `text-[13.5px]` — the template's `mb-8` was the gap before its chips, and with those gone it has nothing to space */
+  searchEmptySub: 'text-[13.5px]',
+  /**
+   * The template's `TRENDING NOW` block — its label
+   * (`text-[13px] font-semibold tracking-wide uppercase mb-3`), its chip cloud
+   * (`flex flex-wrap gap-2`), its track chip
+   * (`px-4 h-8 rounded-full text-[14px] font-medium active:scale-95 transition-transform`)
+   * and its artist chip (`… transition`) — is DELIBERATELY NOT PORTED (decision:
+   * Danial). Its data went with it: `TRENDING_ARTISTS` and the `trending` flag on
+   * the archive table, which fed `Ie = rl.filter(m => m.trending).slice(0, 5)`.
+   */
 
   /** the skeletons: rows `flex items-center px-5`, cover `w-[52px] h-[52px] rounded-[14px] animate-pulse`,
    *  bars `h-4 w-32 rounded-full animate-pulse` and `h-3 w-20 rounded-full animate-pulse` */
@@ -438,13 +435,13 @@ export const ADD_SONG_COPY = {
 
   /**
    * The search view's copy, byte for byte from the Add-song template's JSX:
-   * the placeholder (5288), the two empty-state lines (5315, 5319), the trending
-   * label (5324), and the no-results pair (5412, 5416).
+   * the placeholder (5288), the two empty-state lines (5315, 5319), and the
+   * no-results pair (5412, 5416). The template's `Trending now` label (5324) is
+   * NOT here — that whole block is not ported (decision: Danial).
    */
   searchPlaceholder: 'Search songs, artists...',
   searchEmptyTitle: 'No recent searches',
   searchEmptySub: 'Start typing to find tracks',
-  searchTrendingLabel: 'Trending now',
   /** original: `['No results for "', a, '"']`, split so the query sits between the two */
   searchNoResultsPrefix: 'No results for "',
   searchNoResultsSuffix: '"',

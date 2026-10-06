@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react';
 import { ADD_SONG_CLASS, ADD_SONG_COPY, ADD_SONG_METRICS, ADD_SONG_THEME } from '@/design/addSong';
-import { TRENDING_ARTISTS, TRENDING_SEEDS } from '@/data/addSong';
 import type { AddSearchSeed } from '@/data/addSong';
 import type { ThemeMode } from '@/types/theme';
 import { CheckGlyph, ChevronLeftGlyph, CloseGlyph, LoaderGlyph, Music2Glyph, PlusGlyph, SearchGlyph } from './icons';
@@ -36,10 +35,10 @@ export interface AddSongSearchProps {
  * Its four states are all the template's, in its own order:
  *
  *   blank query   the 72px disc with a 32px `Search` glyph at `strokeWidth 1.6`,
- *                 `No recent searches`, `Start typing to find tracks`, and the
- *                 chips: the five `trending` archive entries plus the three
- *                 artists the template hard-codes (`Ebi`, `Googoosh`, `Hayedeh`).
- *                 A chip sets the query — it does not search.
+ *                 `No recent searches`, and `Start typing to find tracks`. The
+ *                 template's `TRENDING NOW` block — its label, the five `trending`
+ *                 entries it flagged and the three hard-coded artists — is NOT
+ *                 ported (decision: Danial): that option is not wanted there.
  *   searching     three skeleton rows while the hook's 600ms debounce runs.
  *   results       the 72px rows: a 52px `rounded-[14px]` cover (the entry's OWN
  *                 gradient and letter), a `truncate` title over a `#8E8E93`
@@ -150,36 +149,6 @@ export function AddSongSearch({
             </div>
             <div className={`${ADD_SONG_CLASS.searchEmptySub} ${palette.searchInk}`}>
               {ADD_SONG_COPY.searchEmptySub}
-            </div>
-
-            <div className={ADD_SONG_CLASS.searchTrending}>
-              <div className={`${ADD_SONG_CLASS.searchTrendingLabel} ${palette.searchInk}`}>
-                {ADD_SONG_COPY.searchTrendingLabel}
-              </div>
-
-              <div className={ADD_SONG_CLASS.searchChips}>
-                {TRENDING_SEEDS.map((seed) => (
-                  <button
-                    key={seed.id}
-                    type="button"
-                    onClick={() => onQueryChange(seed.title)}
-                    className={`${ADD_SONG_CLASS.searchChipTrack} ${palette.searchSurface} ${palette.text}`}
-                  >
-                    {seed.title}
-                  </button>
-                ))}
-
-                {TRENDING_ARTISTS.map((artist) => (
-                  <button
-                    key={artist}
-                    type="button"
-                    onClick={() => onQueryChange(artist)}
-                    className={`${ADD_SONG_CLASS.searchChipArtist} ${palette.searchSurface} ${palette.text}`}
-                  >
-                    {artist}
-                  </button>
-                ))}
-              </div>
             </div>
           </div>
         ) : searching ? (

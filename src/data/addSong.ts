@@ -4,12 +4,14 @@
  *
  * Sources, all from the readable template (`Library/_extract/script-01.fmt2.js`):
  *
- *   `rl`  the archive table — id, title, artist, duration, letter, gradient and
- *         the `trending` flag the empty state's chips are cut from
+ *   `rl`  the archive table — id, title, artist, duration, letter, gradient
  *   `L`   a chosen local file (5076-5104): the row goes up FIRST and the track
  *         lands 900ms after the bar fills
  *   `VA`  a picked search result (5108-5127)
- *   `Ie`  the five trending entries the chips show (5128)
+ *
+ * The template's `trending` flag and its `Ie = rl.filter(m => m.trending).slice(0, 5)`
+ * (5128) are NOT here: they fed the empty state's `TRENDING NOW` chips, and that
+ * whole block is not ported (decision: Danial).
  *
  * The cover colours come from the SAME `En` gradient table Playlist v6 ships, so
  * they are imported from `./playlistV6` rather than copied a second time. Each
@@ -29,8 +31,8 @@ import type { Track } from './tracks';
  * Original `rl[i]` — one entry of the archive.
  *
  * The shape is the template's, not this app's: the row draws `letter` on
- * `gradient`, the filter reads `title`/`artist`, the chips read `trending`, and
- * `duration` is carried straight into the created track by `VA`.
+ * `gradient`, the filter reads `title`/`artist`, and `duration` is carried
+ * straight into the created track by `VA`.
  */
 export interface AddSearchSeed {
   /** `id` — the entry's own key. `VA` keys the spinner/✓ sets on THIS, not on the title. */
@@ -43,17 +45,15 @@ export interface AddSearchSeed {
   letter: string;
   /** `gradient` — the cover's colour, the entry's own */
   gradient: string;
-  /** `trending` — `Ie = rl.filter(m => m.trending).slice(0, 5)` */
-  trending?: true;
 }
 
-/** Original `rl` — the twelve tracks the view searches. */
+/** `rl` — the twelve tracks the view searches. */
 export const ADD_SEARCH_SEEDS: readonly AddSearchSeed[] = [
-  { id: 1, title: 'Bi Gharar', artist: 'Shadmehr Aghili', duration: '3:42', letter: 'B', gradient: V6_GRADIENTS[0], trending: true },
-  { id: 2, title: 'Taghdir', artist: 'Moein', duration: '4:18', letter: 'T', gradient: V6_GRADIENTS[1], trending: true },
-  { id: 3, title: 'Khooneye Arezoo', artist: 'Ebi', duration: '3:05', letter: 'K', gradient: V6_GRADIENTS[2], trending: true },
+  { id: 1, title: 'Bi Gharar', artist: 'Shadmehr Aghili', duration: '3:42', letter: 'B', gradient: V6_GRADIENTS[0] },
+  { id: 2, title: 'Taghdir', artist: 'Moein', duration: '4:18', letter: 'T', gradient: V6_GRADIENTS[1] },
+  { id: 3, title: 'Khooneye Arezoo', artist: 'Ebi', duration: '3:05', letter: 'K', gradient: V6_GRADIENTS[2] },
   { id: 4, title: 'Parvaze Ghooha', artist: 'Mojtaba Daghighy', duration: '5:02', letter: 'P', gradient: V6_GRADIENTS[3] },
-  { id: 5, title: 'Neon Veil', artist: 'Lumen Field', duration: '2:57', letter: 'N', gradient: V6_GRADIENTS[4], trending: true },
+  { id: 5, title: 'Neon Veil', artist: 'Lumen Field', duration: '2:57', letter: 'N', gradient: V6_GRADIENTS[4] },
   { id: 6, title: 'Midnight Society', artist: 'Atlas Club', duration: '3:33', letter: 'M', gradient: V6_GRADIENTS[5] },
   { id: 7, title: 'Sora Bloom', artist: 'Aether', duration: '4:47', letter: 'S', gradient: V6_GRADIENTS[6] },
   { id: 8, title: 'Halcyon Drift', artist: 'Velvet Cove', duration: '3:21', letter: 'H', gradient: V6_GRADIENTS[7] },
@@ -62,17 +62,6 @@ export const ADD_SEARCH_SEEDS: readonly AddSearchSeed[] = [
   { id: 11, title: 'Saffron Dusk', artist: 'Kairo', duration: '3:56', letter: 'S', gradient: V6_GRADIENTS[10] },
   { id: 12, title: 'Crystal Loom', artist: 'Cerulean', duration: '4:33', letter: 'C', gradient: V6_GRADIENTS[11] },
 ] as const;
-
-/** `Ie` — `rl.filter(m => m.trending).slice(0, 5)`, the empty state's chips. */
-export const TRENDING_SEEDS: readonly AddSearchSeed[] = ADD_SEARCH_SEEDS.filter(
-  (seed) => seed.trending,
-).slice(0, 5);
-
-/**
- * The three artist chips the template prints after the trending titles — its own
- * literal list (`["Ebi","Googoosh","Hayedeh"]`), not a slice of the archive.
- */
-export const TRENDING_ARTISTS = ['Ebi', 'Googoosh', 'Hayedeh'] as const;
 
 /**
  * `vi` — the filtered archive, and the ONE function the search view reads.

@@ -357,7 +357,7 @@ between them.
 | the skeletons | three rows at 72px: a `w-[52px] h-[52px] rounded-[14px] animate-pulse` cover and two `h-4 w-32` / `h-3 w-20` bars, `#1C1C1E`/`#F0F0F0` |
 | the rows | 72px, `px-5`: a 52px `rounded-[14px]` cover with the entry's OWN gradient and a 20px white letter, a `truncate font-semibold` 16/20 title, a 13.5px `#8E8E93` artist, a `w-8 h-8` add disc, and a `h-[1px]` divider inset to `left-[72px]` |
 | the add disc | `+` → spinner → ✓, and only the GLYPH changes until the row is added. Idle: a `#E5E5EA`/`#2C2C2E` border on `#FFFFFF`/`#1C1C1E` with a `#8E8E93` glyph. Saved: `#34C759` border and fill, white ✓, on `checkSpring` |
-| the empty state | a 72px disc with a 32px `Search` at `strokeWidth 1.6`, `No recent searches`, `Start typing to find tracks`, then `TRENDING NOW` and the chips: the five `trending` entries plus the template's three hard-coded artists (`Ebi`, `Googoosh`, `Hayedeh`). A chip SETS THE QUERY; it does not search |
+| the empty state | a 72px disc with a 32px `Search` at `strokeWidth 1.6`, `No recent searches`, and `Start typing to find tracks` — nothing else. The template's `TRENDING NOW` block (its label, the five `trending` entries and its three hard-coded artists) is NOT ported: Danial does not want that option there, so the block, its classes, its copy, `TRENDING_ARTISTS` and the archive table's `trending` flag all left together |
 | no matches | a 64px disc with a 28px `Music2`, `No results for "<what you typed>"`, `Try a different search term` |
 
 Worth knowing:
@@ -367,9 +367,13 @@ Worth knowing:
 * **The two icon-only buttons carry aria-labels the template did not have**
   (`searchBackLabel` / `searchClearLabel`), in Persian, like the uploading row's ✕.
 * **The archive is this app's own table** (`ADD_SEARCH_SEEDS`, twelve entries) in the
-  template's ENTRY SHAPE: `id`, `title`, `artist`, `duration`, `letter`, `gradient`, and
-  `trending` on five of them. Each entry keeps its OWN gradient, so filtering never repaints
-  the list — the panel's index-keyed colours (`En[T % En.length]`) went with the panel.
+  template's ENTRY SHAPE: `id`, `title`, `artist`, `duration`, `letter`, `gradient`. Each
+  entry keeps its OWN gradient, so filtering never repaints the list — the panel's
+  index-keyed colours (`En[T % En.length]`) went with the panel. (The template's `trending`
+  flag left with the `TRENDING NOW` block it fed.)
+* **No `TRENDING NOW`, no chips.** That whole block is gone on his instruction — label, chip
+  cloud, the three hard-coded artists and the archive's `trending` flag with them. The empty
+  state is the disc and the two lines, nothing else.
 * **Nothing is capped.** The panel showed the first six with no query and a maximum of eight
   with one; the template's filter has neither, so neither does this.
 * **A picked result stays in the view** with the query as typed — the template resets
