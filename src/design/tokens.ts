@@ -5,6 +5,7 @@
  * Nothing here is inferred or rounded: every value carries the class or the
  * inline style it came from so it can be re-verified against the original.
  */
+import type { NavItemSpec } from '@/types/theme';
 
 /** The four destinations. Original: `var Bl=[{id:"home",label:"Home"},{id:"search",label:"Search"},{id:"library",label:"Library"},{id:"profile",label:"Profile"}]`. */
 export const NAV_ITEMS = [
@@ -13,6 +14,18 @@ export const NAV_ITEMS = [
   { id: 'library', label: 'Library' },
   { id: 'profile', label: 'Profile' },
 ] as const;
+
+/**
+ * The destinations the bar actually offers — the artifact's four minus the last.
+ *
+ * DEVIATION from the artifact, on purpose (decision: Danial). The artifact put
+ * all four in one pill; the bar is now three destinations, and the fourth slot
+ * is a separate button that is not a destination at all (see
+ * `components/BottomNav/NavActionButton.tsx`). `NAV_ITEMS` is kept whole above
+ * because it is the artifact's own array and the fidelity record of it; this is
+ * the live list.
+ */
+export const NAV_TABS: readonly NavItemSpec[] = NAV_ITEMS.slice(0, -1);
 
 /** The default active destination. Original: `useState("home")`. */
 export const DEFAULT_ACTIVE_ID = 'home';
@@ -45,6 +58,21 @@ export const NAV_BAR = {
   pillMaxWidth: 352,
   /** pill container: `h-[56px]` */
   pillHeight: 56,
+  /**
+   * Gap between the pill and the `+1` button: `gap-2`.
+   *
+   * DEVIATION from the artifact, on purpose (decision: Danial). The bar used to
+   * be four destinations in ONE pill; the fourth is now its own round button
+   * beside the pill — the 3+1 split.
+   *
+   * The button's diameter is deliberately NOT a token here: it IS `pillHeight`,
+   * read at the call site, because that is the whole point of the choice —
+   * 56 against 56 is what makes the bar and the button read as one set instead
+   * of a bar plus an accessory, and a second literal could drift from the first.
+   * The gap is the only new number, and it is measured: on the reference the
+   * round button sat 22px from a 158px-tall bar, so 22 / 158 × 56 ≈ 8.
+   */
+  actionGap: 8,
   /**
    * Edge inset of the indicator inside the pill — one number, both axes.
    *
@@ -107,9 +135,19 @@ export const NAV_BAR = {
  * pill uses, so it follows the light/dark switch instead of being white always.
  */
 export const MINI_PLAYER = {
-  /** the pill itself */
+  /**
+   * The pill itself.
+   *
+   * `pointer-events-auto` is load-bearing: the pill is a child of `BottomNav`'s
+   * stack, whose class carries `pointer-events-none` so the empty column around
+   * the two pills cannot swallow taps meant for the screen behind it. Every pill
+   * in that stack has to opt back in — the nav pill does it in `PILL_CLASS`; this
+   * one did not, so the whole mini player (buttons included, `pointer-events`
+   * inherits) was click-through: play/pause and ✕ landed on the track row behind
+   * it and silently swapped the now-playing track instead.
+   */
   shell:
-    'relative mx-auto w-full max-w-[352px] h-[56px] rounded-full px-2 pr-1.5 flex items-center gap-2.5 overflow-hidden',
+    'pointer-events-auto relative mx-auto w-full max-w-[352px] h-[56px] rounded-full px-2 pr-1.5 flex items-center gap-2.5 overflow-hidden',
   /** the cover disc; `background` comes from the track's gradient */
   cover:
     'shrink-0 w-8 h-8 rounded-full grid place-items-center text-white text-[11px] font-semibold shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]',

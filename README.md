@@ -61,19 +61,22 @@ src/
 │   ├── theme.ts                  every themed value per mode + harness classes
 │   ├── motion.ts                 easings, durations, composed transition strings
 │   ├── home.ts                   Home: row geometry, colours, whole class strings
-│   └── playlistV6.ts             v6: geometry, copy, whole class strings
+│   ├── playlistV6.ts             v6: geometry, copy, whole class strings
+│   └── addSong.ts                add flow: geometry, timings, per-mode surfaces, copy
 ├── components/
 │   ├── BottomNav/
-│   │   ├── BottomNav.tsx         the bottom stack + glass pill + track + items
+│   │   ├── BottomNav.tsx         the stack + the `[pill][gap][button]` row
 │   │   ├── NavItem.tsx           one destination button
+│   │   ├── NavActionButton.tsx   the button beside the pill — an action, not a tab
 │   │   ├── HighlightBubble.tsx   72×48 bubble + 64 px tap glow
 │   │   ├── icons.tsx             the four glyphs, one component each
 │   │   ├── navKeyframes.css      icon-spring / softGlow / reduced-motion
-│   │   └── types.ts              BottomNavProps (incl. the `above` slot)
+│   │   └── types.ts              BottomNavProps (incl. `above` + `action`)
 │   ├── HomeScreen/               the screen from `enterprise-playlist 2.html`
-│   │   ├── HomeScreen.tsx        scroll shell + header + list
+│   │   ├── HomeScreen.tsx        scroll shell + header + list (+ added rows)
 │   │   ├── HomeHeader.tsx        sticky 64px bar + search button
 │   │   ├── TrackRow.tsx          one 72px row; tapping it sets now-playing
+│   │   ├── UploadRow.tsx         the same 72px row while a file uploads into it
 │   │   ├── icons.tsx             the header's search glyph
 │   │   └── index.ts
 │   ├── PlaylistV6/               the screen from `Nav-music-playlist.html.html`
@@ -85,19 +88,27 @@ src/
 │   │   ├── icons.tsx             every glyph the screen draws
 │   │   ├── playlistKeyframes.css slideUp / sheetUp
 │   │   └── types.ts, index.ts
+│   ├── AddSong/                  the flow from `Library/Add-song.html`
+│   │   ├── AddSongSheet.tsx      the drawer — two rows
+│   │   ├── AddSongSearch.tsx     the search view — the drawer's second row leads here
+│   │   ├── AddSongLayer.tsx      input + toast + drawer, over the frame
+│   │   ├── icons.tsx             every glyph the flow draws
+│   │   ├── addSongKeyframes.css  fadeIn / sheetUp / checkSpring
+│   │   └── index.ts
 │   ├── MiniPlayer/
 │   │   ├── MiniPlayer.tsx        the pill above the bar, in the bar's own glass
 │   │   └── miniKeyframes.css     miniPlayerIn
 │   ├── ThemeToggle.tsx           light/dark switch
-│   ├── ViewSwitch.tsx            harness chrome: harness ⇄ Playlist v6
 │   └── NavPreviewLabel.tsx       "Nav preview / bottom-nav / <id> · <n>"
 ├── data/
 │   ├── tracks.ts + tracks.json   the Home catalogue + its loader
-│   └── playlistV6.ts             the v6 generator and its three source arrays
+│   ├── playlistV6.ts             the v6 generator and its three source arrays
+│   └── addSong.ts                the archive table + the two row builders
 ├── hooks/
 │   ├── useNavGesture.ts          press / glow / drag state machine
 │   ├── useThemeMode.ts           OS preference + manual override
 │   ├── useTracks.ts              one load per mount, abort-guarded
+│   ├── useAddSong.ts             sheet / search / file-picker + upload machine
 │   ├── usePlaybackClock.ts       the v6 100 ms progress clock
 │   └── useScrollCompact.ts       scroll position → the nav pill's two sizes
 ├── lib/
@@ -177,14 +188,214 @@ off the bottom edge: a nav pill that collapses as you scroll, a mini player, and
 
 ### How to see it
 
-`ViewSwitch` (page top-left, or press **v**) swaps the device screen between the
-original harness and Playlist v6. It sits *outside* the phone frame so it can never be
-mistaken for part of either design. The v6 screen brings its own nav and is light-only
-in the original, so the harness's own nav and theme switch stand down while it is
-mounted — the harness view itself is untouched.
+The screen is currently **not mounted**. `App` renders `HomeScreen` for `home` and the
+`NavPreviewLabel` for the other three destinations; the `ViewSwitch` that used to swap
+Playlist v6 in was removed, and the port has been unrendered since. It is intact under
+`components/PlaylistV6/`, and one branch in `App.tsx` brings it back — either as that
+switch again, or routed through the project's own glass nav the way `home` already
+opens `HomeScreen`.
 
-Prefer routing it through the project's own glass nav instead (the way `home` already
-opens HomeScreen)? That is one branch in `App.tsx`.
+## Add music — the third artifact
+
+`../Add music.html` is the third exported artifact. Its app region is
+`_extract-add-music/app.source.js` (746 formatted lines), and **only its add flow** was
+ported: the hidden file input and the toast. Two more surfaces came from
+`Library/Add-song.html` afterwards — the drawer and the search view — and the sheet and the
+API search panel this artifact drew have been replaced by them (see "The drawer" and "The
+search view" below). The
+rest of that screen — its list, its glass nav, its mini player and its Now Playing sheet —
+duplicates things this app already has from the other two artifacts, so it is left where it
+is. The artifact's own trigger (the `ADD NEW SONG` pill) is left there too; see "The trigger
+moved" below.
+
+| step | tool | output |
+|---|---|---|
+| split | `tools/split_artifact.py` | `_extract-add-music/style-*.css`, `script-*.js` |
+| make it readable | `tools/jsformat2.py` | `LOSSLESS: True` |
+| isolate the app region | — | `_extract-add-music/app.source.js` (lines 39-746) |
+| slice out just the add flow | — | `_extract-add-music/add-flow.source.js` (lines 248-253 — the sheet at 289-399 and the panel at 400-462 have both been replaced, see below) |
+| **prove nothing was dropped** | `parity_check.py --original …/add-flow.source.js` | PASS — 12/12 class tokens, 9/9 numeric literals, **no deviations** |
+
+### The trigger moved — and the artifact's own button went with it
+
+The artifact's trigger was a 340px `ADD NEW SONG` button pinned at `top-4`: 52px tall, and
+36px once the screen had scrolled past **80px**, with a `shimmerMove 2.8s` sweep and two
+layers cross-fading inside it — plus a 3-second "hold it open" deadline behind it (`Hl()`,
+which sets a timer and is NOT the toast, despite reading like one).
+
+**All of it is gone (decision: Danial).** The navbar's `+` button does that job now, so the
+pill left, and its geometry, its timings, its palette entries and its `shimmerMove` keyframe
+went with it. The trigger is the only thing that changed: the sheet it opens is
+byte-identical, and with the pill gone the flow's layers are back on the artifact's OWN
+offsets (`top-[76px]` and `top-[72px]`) — which is why this is the one gate in the project
+that needs no deviations at all.
+
+### What was ported
+
+* **The two paths, and what each really does.** The drawer's first row closes it, raises the
+  toast for 2200ms and clicks a hidden `input[type=file][accept=audio/*]` 200ms later; the
+  file's name (extension stripped) becomes the title, the monogram comes off the FILE NAME
+  rather than the title, and 900ms after the bar fills the row becomes a real track —
+  `Unknown Artist`, the artifact's own line, with the label it rolled and `seconds` derived
+  from that label. The second row closes the drawer and the search view takes the screen
+  180ms later; see "The search view" below. (The API panel that used to answer this row —
+  its 12-seed catalogue, its "first six with no query / max eight" caps, its
+  `… • Demenish` artist suffix and its simulation footer — went with it.)
+* **The sheet this artifact drew has been REPLACED.** It was two 132px cards — the local
+  one a light card with a dark tile, a diagonal `from-zinc-50 to-white` wash and a 120px
+  blob; the API one `bg-[#0A0A0B]` with a white tile and two radial gradients — plus a
+  `LOCAL`/`API` chip each and a note box. The drawer is now the Add-song artifact's, on
+  Danial's instruction; see "The drawer" below for what stands there now, and for the one
+  command that re-cuts this flow's parity gate.
+* **Every glyph**, attribute list included. The Add-song template builds all of its own
+  through lucide's factory, so they carry `strokeLinecap/Linejoin: "round"` and a default
+  `strokeWidth` of 2; the widths are stated at each call site instead, exactly as the
+  template states them. `AddSong/icons.tsx` carries the table of every glyph, its size and
+  its width.
+* **The copy**, byte for byte from whichever file each surface came from: the drawer and the
+  search view speak the Add-song template's English, the gallery toast speaks this
+  artifact's Persian. Nothing in the flow touches the network, which is what keeps the
+  build offline.
+
+### The drawer — now the Add-song one's (decision: Danial)
+
+The sheet that shipped first was *this* artifact's: two 132px cards, `rounded-t-[28px]`, a
+`z-[55]` backdrop and a note box. He asked for the drawer from `Library/Add-song.html`
+instead, so that is what stands there now, at its own values, in both modes:
+
+| | the template (`Add-song.html` 5421-5501) |
+|---|---|
+| backdrop | `bg-black/40 backdrop-blur-[12px]`, `fadeIn 0.3s ease-out` — **not** themed, exactly as the template wrote it |
+| panel | `max-w-[390px] rounded-t-[24px]`, `padding:12px 24px 32px 24px`, `box-shadow:0 -10px 40px rgba(0,0,0,0.12)`, rising on `slideUp 0.32s cubic-bezier(0.32,0.72,0,1)` |
+| `z` | backdrop `55`, panel `66`. The template's own `z-40` cannot work here: this app's bottom nav is `z-50` and is rendered *after* the drawer, so it painted on top of it. The ladder is the flow's existing one — nav `50` → drawer backdrop `55` → drawer panel `66` → toast `80`. (The search view needs no `z`: it is a screen, not an overlay.) |
+| panel colour | `#1C1C1E` dark / `#FFFFFF` light; the title, both row titles and both chevrons take the panel's inherited text colour, as the template's screen root set it |
+| grabber | `w-9 h-1`, `#3A3A3C` / `#E5E5EA` |
+| title | centered `17px/22px` semibold — `Add to Library` |
+| rows | two `56px` rows at `padding:0 4px`: a `40px` disc (`#2C2C2E` / `#F2F2F7`) holding a `20px` glyph at `strokeWidth 1.8`, a `font-medium 16/19` title, a `13px #8E8E93` sub, and a `16px` chevron at `rotate-180 opacity-40` |
+| footer | NONE — the template's `h-4` spacer and its `134×5` home indicator are dropped (decision: Danial), for the same reason the *nav bar's* copy was |
+
+Three things worth knowing:
+
+* **The copy is the template's own English, verbatim** — `Add to Library`,
+  `Upload from Device` + `mp3, m4a, wav`, `Search Archive` + `Thousands of tracks` —
+  because a 100% port carries the reference file's words. (The gallery toast stays Persian:
+  it came from `Add music.html`, and that is *its* copy. Each surface speaks the language of
+  the file it was taken from.)
+* **There is no ✕ button.** The template closes on the backdrop alone, and so does this.
+  One line to add one back.
+* **The rows keep this app's behaviour.** `Upload` opens the real `input[type=file]` picker
+  (the template instead starts a synthetic `Track N.mp3` upload, which would throw the
+  user's own file away) and `Search Archive` opens the search view 180ms later.
+* **The home indicator is NOT drawn.** The template ends on an `h-4` spacer and a
+  `134×5` bar (`#3A3A3C` / `#000000`); both are gone (decision: Danial). On a real
+  device iOS draws its own indicator at exactly that spot — the argument that
+  dropped the nav bar's copy — and in light mode that bar was a solid black line
+  across the drawer. With it gone the panel ends on its own `32px` bottom padding.
+
+The Add music sheet's class strings, palette entries and copy were deleted with it, its four
+glyphs (`rm`, `lm`, the right-hand chevron, the note's info glyph) are gone, and this flow's
+parity gate now covers what is actually left — the toast and the file input — re-cut it with:
+
+```bash
+sed -n '248,253p' _extract-add-music/app.source.js > _extract-add-music/add-flow.source.js
+python3 tools/parity_check.py --original _extract-add-music/add-flow.source.js
+```
+
+which reports 12 class tokens and 9 numeric literals, none missing. (`289-399` was the sheet
+and `400-462` the API panel; both are replaced, so both left the slice.)
+
+### The row lifecycle — ported from `../Library/Add-song.html`
+
+The flow used to commit a row the instant a file or a result was chosen. The readable
+`Add-song.html` does not: it puts a row up first and finishes the job later. That lifecycle
+is now this app's, with the artifact's own numbers:
+
+| step | the artifact | here |
+|---|---|---|
+| a file is chosen | a row with `progress: 0`, `status: "uploading"` goes up | `PendingUpload`, `buildPendingUpload` |
+| the bar fills | `setInterval(…, 80)` with `+= random*8 + 3` per tick → ~0.7–2.7s | `uploadTickMs` / `uploadStepMin` / `uploadStepRandom` |
+| the bar is full | `status: "processing"`, label → `Processing…` | `ADD_SONG_COPY.processingLabel` |
+| 900ms later | the real track replaces it + toast + `navigator.vibrate(10)` | `commitPendingUpload`, `uploadCommitMs` |
+| the ✕ | `H()` — clear the interval, drop the row | `controller.cancelUpload` |
+| a result is picked | spinner 900ms → ✓ for 1500ms, the track lands at the spinner's end | `pickResult`, `searchAddMs` / `searchAddedMs` |
+
+The row is a row of the **Home list**, not a second dialog: `useAddSong` owns it, `App`
+hands it to `HomeScreen` as `pending`, and `components/HomeScreen/UploadRow.tsx` composes
+`HOME_STATIC` — so the row a file uploads into and the row it becomes are the same 72px row
+and the list does not shift when the swap happens.
+
+Three deliberate choices, each reversible in one line:
+
+* **a picked result does not leave the search view.** The template stays on its search tab
+  and keeps the query, so this does too — and the ✓ needs the row to still be there to be
+  seen. `pickResult` used to call `setSearchOpen(false)` + `setQuery('')`.
+* **the artist is the artifact's own**: `"Unknown Artist"` for an uploaded file, and the
+  entry's own `artist` for a picked result (`VA` adds no suffix). The earlier
+  `Local • گوشی شما` was this app's invention and went with the rest of it.
+* **one new colour: the artifact's own `#34C759`** for the ✓-saved disc
+  (`ADD_SONG_THEME[…].searchSaved`). It is the only non-ink colour in this app, and it is
+  there because an "ink" ✓ reads as decoration instead of as success.
+
+Added for it: `addSongKeyframes.css`'s `checkSpring` (the artifact's own keyframes),
+`CheckGlyph` + `LoaderGlyph` in `AddSong/icons.tsx` (`ci` / `oo`), and the upload row's
+class strings in `design/home.ts` (`UPLOAD_ROW`, `UPLOAD_ROW_CLASSES`). `tsc --noEmit` is
+clean and every changed file was syntax-checked with the project's own `esbuild`.
+
+### The search view — from `../Library/Add-song.html` (decision: Danial)
+
+The drawer's second row used to open the Add music artifact's floating API panel. He asked for
+the Add-song one instead, and that artifact's search is not a panel at all — it is a SCREEN:
+picking `Search Archive` closes the drawer and switches the page to it
+(`F(!1), t("search"), s("")`). So it renders where `HomeScreen` renders, and `App` chooses
+between them.
+
+| | the template (`Add-song.html` 5268-5418) |
+|---|---|
+| the screen | `flex flex-col flex-1 min-h-screen`, `#000000` / `#FFFFFF`. Here `absolute inset-0` inside the frame, plus `pb-28` so the nav's stack cannot cover the last row |
+| the header | `flex items-center gap-3 px-4 pt-3 pb-3`: a `w-9 h-9 -ml-1` back disc (`ChevronLeft` 22 / 2.2) and a `flex-1 h-9 px-3 rounded-full` field — `#1C1C1E`/`#F2F2F7`, a 16px `Search` glyph, a `text-[15px]` input, and a `w-6 h-6` clear chip (`#2C2C2E`/`#E5E5EA`, `X` at 12) that exists only while there is a query |
+| the debounce | 600ms. A blank query clears the list at once; anything else raises `searching` and the filter runs once the typing settles |
+| the skeletons | three rows at 72px: a `w-[52px] h-[52px] rounded-[14px] animate-pulse` cover and two `h-4 w-32` / `h-3 w-20` bars, `#1C1C1E`/`#F0F0F0` |
+| the rows | 72px, `px-5`: a 52px `rounded-[14px]` cover with the entry's OWN gradient and a 20px white letter, a `truncate font-semibold` 16/20 title, a 13.5px `#8E8E93` artist, a `w-8 h-8` add disc, and a `h-[1px]` divider inset to `left-[72px]` |
+| the add disc | `+` → spinner → ✓, and only the GLYPH changes until the row is added. Idle: a `#E5E5EA`/`#2C2C2E` border on `#FFFFFF`/`#1C1C1E` with a `#8E8E93` glyph. Saved: `#34C759` border and fill, white ✓, on `checkSpring` |
+| the empty state | a 72px disc with a 32px `Search` at `strokeWidth 1.6`, `No recent searches`, `Start typing to find tracks`, then `TRENDING NOW` and the chips: the five `trending` entries plus the template's three hard-coded artists (`Ebi`, `Googoosh`, `Hayedeh`). A chip SETS THE QUERY; it does not search |
+| no matches | a 64px disc with a 28px `Music2`, `No results for "<what you typed>"`, `Try a different search term` |
+
+Worth knowing:
+
+* **It is English, verbatim** — `Search songs, artists...`, `No recent searches`,
+  `Trending now`, `Try a different search term` — for the same reason the drawer is.
+* **The two icon-only buttons carry aria-labels the template did not have**
+  (`searchBackLabel` / `searchClearLabel`), in Persian, like the uploading row's ✕.
+* **The archive is this app's own table** (`ADD_SEARCH_SEEDS`, twelve entries) in the
+  template's ENTRY SHAPE: `id`, `title`, `artist`, `duration`, `letter`, `gradient`, and
+  `trending` on five of them. Each entry keeps its OWN gradient, so filtering never repaints
+  the list — the panel's index-keyed colours (`En[T % En.length]`) went with the panel.
+* **Nothing is capped.** The panel showed the first six with no query and a maximum of eight
+  with one; the template's filter has neither, so neither does this.
+* **A picked result stays in the view** with the query as typed — the template resets
+  neither, and the ✓ needs the row to still be there.
+* **A tap on any nav destination leaves the view**, which is what the template's tab switch
+  does; without it the view would sit over the screen the user just asked for.
+
+What left with the panel: its `z-[70]` blur backdrop, its `top-[72px] max-w-[400px]` shell, its
+44px field with the 14px `r="6"` search glyph (a DIFFERENT `Search` from this view's `r="8"`),
+its results eyebrow (`Demenish • N result`), its simulation footer, its 12px add glyph, and
+the `filterAddSearch` / `resultGradient` helpers that fed it.
+
+### The two adaptations
+
+* **`fixed` → `absolute`.** The artifact *was* the page and pinned its layers to the
+  viewport. Here they are `absolute` inside the phone frame — which is what its `fixed`
+  layers were relative to the viewport — and `App` renders them as children of the frame
+  beside the screen. They cannot live inside the screen: an `absolute` overlay inside a
+  scrolling box anchors to the scroll content and would travel with the list.
+* **Per-mode surfaces — the one axis the artifact could not have had.** Its screen was
+  light-only, so every surface in the flow was written once, in light. Each is now an
+  `AddSongPalette` entry: the LIGHT values are byte-identical to the artifact and the dark
+  ones are derived from the app's own dark tokens — the same treatment `ThemePalette` gave
+  the mini player, for the same reason. The Add-song surfaces are the exception in the other
+  direction: the template wrote its own dark values (`#000000` screen, `#1C1C1E` surfaces,
+  `#2C2C2E` outlines, `#F0F0F0` hairlines, `#8E8E93` ink) and those are used as written.
 
 ## Run it
 
@@ -235,6 +446,50 @@ shape as the artifact it replaces, but readable and rebuildable.
     explicit deviations with that reason; the drag maths in `lib/navGeometry.ts` is
     unchanged and now lands on the slot's own centre for free.
   The 350ms tap glow, the drag and the snap are untouched.
+* **The bar is three destinations and a button — deliberate deviation (Danial).**
+  The artifact put all four destinations in one pill. The bar now offers three —
+  `NAV_TABS`, the artifact's own array minus its last entry, with `NAV_ITEMS` kept
+  whole above it because that is the fidelity record — and the fourth slot is
+  `components/BottomNav/NavActionButton.tsx`. **It is not a fourth destination**,
+  and that is the entire reason it is a separate component rather than a fourth
+  `NavItem`:
+  - it is not in `activeId`, so it can never be "the selected tab";
+  - it has no selected state, and no glass that claims one;
+  - it never moves, hides or repositions the indicator, and it is not part of the
+    pill's drag track — `useNavGesture` does not know it exists;
+  - it inherits none of the nav items' physics: no `pressScale` 1.04, no 350ms
+    `softGlow` replay, no `icon-spring`. Its press feedback is a plain button's —
+    `active:scale-95` in CSS, the same idiom `ThemeToggle` uses.
+  What it keeps is the bar's *material*, because Danial chose 56px — the pill's
+  own height — precisely so the two read as one set: the same `pillBackground` /
+  `pillBorder` / `pillShadow` / `pillBackdropFilter`, and `pillHeight` for its
+  diameter. There is deliberately no separate size token, because a second literal
+  could drift from the first. The gap is the only new number, `NAV_BAR.actionGap`
+  = 8, and it is measured rather than guessed: on the reference Danial supplied
+  the round button sat 22px from a 158px-tall bar, so 22 / 158 × 56 ≈ 8.
+  Its glyph is its own — `NavActionPlusGlyph`, drawn on the nav's own 22px /
+  `strokeWidth 1.6` geometry — and its icon is `iconActive`, i.e. full contrast: a
+  destination at rest is dimmed to show it is not selected, and this is not a
+  destination at rest. **`onAction` is deliberately unwired** — the button is a
+  placeholder for now (decision: Danial), and wiring it is that one prop.
+  Two consequences worth knowing:
+  - **The pill's width is now derived.** `max-w-[352px]` moved from the pill to
+    the row that holds `[pill][gap][button]`, and the pill is its flex-growing
+    half — so it is `352 − actionGap − pillHeight` at layout time, and it
+    re-derives itself if either number ever moves. At a 390px frame that is 278px,
+    which gives three 90px slots where the artifact had four 83.5px ones.
+  - **The bar's third glyph is `V6HomeIcon`.** `V6DiscoverIcon` left the bar along
+    with the fourth destination; the house that used to sit on the button moved
+    into the bar in its place, so the bar is playlists · library · home, left to
+    right.
+  Inside the pill the 350ms glow, the drag and the snap are untouched, and the
+  pill is still the drag track: with three items the indicator is still exactly
+  one slot wide. `useNavGesture.ts` and `HighlightBubble.tsx` are byte-identical to
+  what they were before the split — an earlier pass taught them to cope with
+  `activeIndex === -1`, and that scaffolding was removed again the moment the
+  button stopped being a destination. See the before/after at
+  `http://localhost:5173/sandbox/nav-split.html` — the same component with and
+  without `action`.
 * **The mini player joined the harness — a new component, not the v6 one (Danial).** v6's
   mini player is white-only (`bg-white/80`) because that screen never had a theme. This
   is a separate `components/MiniPlayer/`, painted with the **same `ThemePalette` glass
@@ -312,7 +567,23 @@ python3 tools/jsformat2.py _extract-nav-playlist/script-01.js _extract-nav-playl
 python3 tools/parity_check.py \
     --original _extract-nav-playlist/app.source.js \
     --deviations tools/parity-nav-playlist.json                              # gates on MISSING
+
+# the Add music artifact — only its add flow is in the gate
+python3 tools/split_artifact.py "../Add music.html" _extract-add-music
+python3 tools/jsformat2.py _extract-add-music/script-01.js _extract-add-music/script-01.fmt2.js
+sed -n '248,253p' _extract-add-music/app.source.js > _extract-add-music/add-flow.source.js
+python3 tools/parity_check.py \
+    --original _extract-add-music/add-flow.source.js                       # gates on MISSING
 ```
+
+The last one is both narrower and stricter than the other two. Narrower, because its subject
+is a *slice* of the artifact — the file input and toast (248-253); the sheet (289-399) and the
+API panel (400-462) it also drew have both been replaced by Add-song surfaces, so they left
+the slice — and neither the rest of that screen nor the artifact's own `ADD NEW SONG`
+pill was ported. Stricter, because it is the one gate in the project that passes with **no
+deviations at all**: everything it covers is in `src/` verbatim. The slice is generated, so
+it lives in the gitignored `_extract-add-music/` beside the region it came from; the `sed`
+line above is the whole recipe.
 
 `parity_check.py` strips comments before it compares, so a value that survives only
 inside a comment cannot satisfy the gate — otherwise the file that *documents* a

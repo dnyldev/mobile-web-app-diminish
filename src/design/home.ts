@@ -140,3 +140,51 @@ export const HOME_CLASSES: Record<
     status: 'text-zinc-400',
   },
 };
+
+/**
+ * The row the add-music flow shows WHILE a local file is still being read.
+ *
+ * It is the SAME 72px row as `TrackRow` — the component composes `HOME_STATIC`
+ * rather than re-declaring the geometry, so the two cannot drift — with the
+ * artist line carrying the upload's own label and a 2px progress track under it.
+ *
+ * The values are this app's own tokens. The artifact drew that bar in `#1C1C1E` /
+ * `#F0F0F0` with a `#FFFFFF` / `#000000` fill and an `#8E8E93` percentage, which
+ * in this design system ARE the hairline, the ink and the muted text (the same
+ * three `HOME_COLORS` already names). The percentage itself reuses
+ * `HOME_STATIC.duration`, so the numbers in that column stay one weight.
+ */
+export const UPLOAD_ROW = {
+  /** original: the bar under the row's title — `mt-[6px] h-[2px] w-full rounded-full overflow-hidden` */
+  progressTrack: 'relative mt-[6px] h-[2px] w-full overflow-hidden rounded-full',
+  /** original: `absolute left-0 top-0 h-full transition-all duration-100 ease-linear` */
+  progressFill: 'absolute left-0 top-0 h-full transition-all duration-100 ease-linear',
+  /**
+   * The ✕ that cancels (the artifact's `H`). Its 32px disc was `active:scale-90`;
+   * at this row's scale it takes the app's own 0.95, the idiom `NavActionButton`
+   * and `ThemeToggle` already use.
+   */
+  cancelButton:
+    'w-7 h-7 rounded-full grid place-items-center shrink-0 transition-transform duration-150 active:scale-95',
+} as const;
+
+/** Per-mode surfaces of the uploading row. */
+export const UPLOAD_ROW_CLASSES: Record<
+  ThemeMode,
+  {
+    progressTrack: string;
+    progressFill: string;
+    cancelButton: string;
+  }
+> = {
+  dark: {
+    progressTrack: 'bg-[#1F1F23]',
+    progressFill: 'bg-[#FAFAFA]',
+    cancelButton: 'bg-white/[0.06] text-[#71717A] hover:bg-white/[0.1] hover:text-[#FAFAFA]',
+  },
+  light: {
+    progressTrack: 'bg-[#F4F4F5]',
+    progressFill: 'bg-[#18181B]',
+    cancelButton: 'bg-black/[0.06] text-[#71717A] hover:bg-black/[0.1] hover:text-[#111113]',
+  },
+};

@@ -1,0 +1,51 @@
+/*
+ * Owned by AddSong. Extracted verbatim from the inline <style> element the
+ * original component rendered into its tree
+ * (_extract-add-music/app.source.js:239-246).
+ *
+ * Of that block's four keyframes, two are NOT here:
+ *
+ *   `slideUp`     belonged to the artifact's mini player, which this app
+ *                 already has from Playlist v6.
+ *   `shimmerMove` belonged to the `ADD NEW SONG` pill, which is gone — its job
+ *                 moved to the nav's `+` button, and a nav button has no sweep.
+ *
+ * No `prefers-reduced-motion` block is needed: `BottomNav/navKeyframes.css`
+ * already carries the document-wide one, and it reaches these because the
+ * animation names are applied from the same document.
+ */
+
+/* The toast (0.2s ease) and the search panel (0.28s cubic-bezier) both use this.
+   It bakes in translateX(-50%) because both are `left-1/2` — exactly as the
+   original did, which is why neither carries a static translate of its own. */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translate(-50%, -8px) }
+  to   { opacity: 1; transform: translate(-50%, 0) }
+}
+
+/* The add sheet (0.44s cubic-bezier). The artifact's Now Playing sheet used the
+   same name at 0.42s; that one is PlaylistV6's own copy.
+   `sheetUp`'s body is also what the Add-song drawer rises on — it calls that
+   keyframe `slideUp` and runs it at 0.32s / cubic-bezier(0.32,0.72,0,1), which
+   is the timing `ADD_SONG_METRICS.panelAnimation` names. */
+@keyframes sheetUp {
+  from { transform: translateY(100%) }
+  to   { transform: translateY(0) }
+}
+
+/* The drawer's backdrop: the Add-song template's `fadeIn` (opacity only, 0.3s
+   ease-out). It cannot use this file's `fadeIn` above — that one bakes in
+   `translateX(-50%)` for the two `left-1/2` layers. */
+@keyframes sheetFadeIn {
+  from { opacity: 0 }
+  to   { opacity: 1 }
+}
+
+/* The ✓ that pops into an API result row once its track has landed — the
+   artifact's own keyframes, applied at `0.4s cubic-bezier(0.34,1.56,0.64,1)`
+   (see ADD_SONG_METRICS.checkSpringAnimation). */
+@keyframes checkSpring {
+  0%   { transform: scale(0.4) }
+  50%  { transform: scale(1.2) }
+  100% { transform: scale(1) }
+}

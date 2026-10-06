@@ -86,20 +86,29 @@ export function ProfileIcon({ active }: NavIconProps) {
 /**
  * Which glyph each destination draws.
  *
- * Step 1 of the harness pass: the pill now draws the **Playlist v6** glyphs,
- * left to right — playlists · library · discover · home. The v6 components are
- * *imported*, not copied, so the two navs cannot drift apart.
+ * The pill draws the **Playlist v6** glyphs — the v6 components are *imported*,
+ * not copied, so the two navs cannot drift apart. Two consequences that come
+ * with the v6 glyphs as they are drawn there: they are 22×22 at
+ * `strokeWidth 1.6` (the harness's own four are 28×28 at 1.75), and they never
+ * fill — in v6 the active state is the pill behind the icon, not a filled glyph.
  *
- * Two consequences that come with the v6 glyphs as they are drawn there: they
- * are 22×22 at `strokeWidth 1.6` (the harness's own four are 28×28 at 1.75),
- * and they never fill — in v6 the active state is the pill behind the icon, not
- * a filled glyph. The destination ids and labels are unchanged; only the
- * pictures are. `HomeIcon` / `SearchIcon` / `LibraryIcon` / `ProfileIcon` are
- * kept below, still exported, so this is one patch to put back.
+ * DEVIATION, ours (decision: Danial): the bar's third destination draws
+ * `V6HomeIcon` in place of `V6DiscoverIcon`, so the house that used to sit on
+ * the `+` button moved into the bar once that slot stopped being a destination.
+ * The bar is now playlists · library · home, left to right.
+ *
+ * `profile` is still keyed because `NavId` still has four members — it is the
+ * artifact's own union — but nothing draws it any more: the button beside the
+ * pill carries its own glyph (`NavActionButton`'s `NavActionPlusGlyph`) and is
+ * not a destination. Its entry keeps `V6DiscoverIcon` so the glyph the bar
+ * dropped is not lost from this module.
+ *
+ * `HomeIcon` / `SearchIcon` / `LibraryIcon` / `ProfileIcon` below are the
+ * harness's own four, still exported, so this stays one patch to put back.
  */
 export const NAV_ICONS: Record<NavId, ComponentType<NavIconProps>> = {
   home: V6PlaylistsIcon,
   search: V6LibraryIcon,
-  library: V6DiscoverIcon,
-  profile: V6HomeIcon,
+  library: V6HomeIcon,
+  profile: V6DiscoverIcon,
 };
