@@ -168,6 +168,17 @@ export const HARNESS_CLASSES: Record<ThemeMode, { page: string; frame: string }>
   },
 };
 
+/**
+ * The page colours `HARNESS_CLASSES` writes as classes (`bg-[#f5f5f7]` /
+ * `bg-[#0a0a0b]`), as values — so the document itself can be painted with them
+ * (`useThemeMode`), which is what keeps the browser's own chrome and the
+ * overscroll area from staying white in a dark session.
+ */
+export const HARNESS_PAGE_COLOR: Record<ThemeMode, string> = {
+  light: '#f5f5f7',
+  dark: '#0a0a0b',
+};
+
 /** Fixed classes on the harness shell (identical in both modes). */
 export const HARNESS_STATIC = {
   page: 'min-h-[100dvh] w-full flex justify-center selection:bg-black/10 transition-colors duration-300',
