@@ -12,7 +12,6 @@ import { NavPreviewLabel } from '@/components/NavPreviewLabel';
 import { Onboarding } from '@/components/Onboarding';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { HARNESS_CLASSES, HARNESS_STATIC } from '@/design/theme';
-import { DEFAULT_ACTIVE_ID } from '@/design/tokens';
 import type { Track } from '@/data/tracks';
 import { useAddSong } from '@/hooks/useAddSong';
 import { useThemeMode } from '@/hooks/useThemeMode';
@@ -40,7 +39,15 @@ import type { NavId } from '@/types/theme';
  */
 export default function App() {
   const { mode, toggle } = useThemeMode();
-  const [activeId, setActiveId] = useState<NavId>(DEFAULT_ACTIVE_ID);
+  /**
+   * The destination the flow ends on.
+   *
+   * The lab's onboarding → auth → library chain lands in the library, so this
+   * app opens on the library tab too. The harness's own `DEFAULT_ACTIVE_ID` is
+   * `home`, whose screen is the older playlist list (the `enterprise-playlist`
+   * port) — landing there made the flow end on the old library instead.
+   */
+  const [activeId, setActiveId] = useState<NavId>('library');
   const [counter, setCounter] = useState(0);
 
   /**
@@ -74,6 +81,8 @@ export default function App() {
     } catch {
       /* storage unavailable — gate reappears next visit */
     }
+    /* The flow ends where the lab's does: in the library. */
+    setActiveId('library');
     setPhase('app');
   }, []);
 
