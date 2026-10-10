@@ -1,9 +1,15 @@
 import { useCallback, useState } from 'react';
 import { AddSongLayer, AddSongSearch } from '@/components/AddSong';
+import { AuthFlow } from '@/components/Auth';
+import type { AuthResult } from '@/components/Auth';
 import { BottomNav } from '@/components/BottomNav';
 import { HomeScreen } from '@/components/HomeScreen';
+import { LibraryScreen } from '@/components/Library';
+import { SEED_TRACKS } from '@/components/Library/data';
+import type { Track as LibraryTrack } from '@/components/Library/types';
 import { MiniPlayer } from '@/components/MiniPlayer';
 import { NavPreviewLabel } from '@/components/NavPreviewLabel';
+import { Onboarding } from '@/components/Onboarding';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { HARNESS_CLASSES, HARNESS_STATIC } from '@/design/theme';
 import { DEFAULT_ACTIVE_ID } from '@/design/tokens';
@@ -36,6 +42,44 @@ export default function App() {
   const { mode, toggle } = useThemeMode();
   const [activeId, setActiveId] = useState<NavId>(DEFAULT_ACTIVE_ID);
   const [counter, setCounter] = useState(0);
+
+  /**
+   * Entry gate: onboarding (3 steps) → auth (welcome/phone/OTP) → the app.
+   * Both completions persist in localStorage so a returning visitor lands
+   * straight in the app. Demo auth only — no backend call behind it.
+   */
+  type Phase = 'onboarding' | 'auth' | 'app';
+  const [phase, setPhase] = useState<Phase>(() => {
+    try {
+      if (window.localStorage.getItem('diminish.onboarded') !== '1') return 'onboarding';
+      if (!window.localStorage.getItem('diminish.auth')) return 'auth';
+      return 'app';
+    } catch {
+      return 'onboarding';
+    }
+  });
+
+  const handleOnboardingDone = useCallback(() => {
+    try {
+      window.localStorage.setItem('diminish.onboarded', '1');
+    } catch {
+      /* storage unavailable — gate reappears next visit */
+    }
+    setPhase('auth');
+  }, []);
+
+  const handleAuthComplete = useCallback((result: AuthResult) => {
+    try {
+      window.localStorage.setItem('diminish.auth', JSON.stringify(result));
+    } catch {
+      /* storage unavailable — gate reappears next visit */
+    }
+    setPhase('app');
+  }, []);
+
+  /** Library demo catalogue + its selection. Display-only, like the harness. */
+  const [libTracks, setLibTracks] = useState<LibraryTrack[]>(SEED_TRACKS);
+  const [libCurrentId, setLibCurrentId] = useState<string | null>(null);
 
   /**
    * Nothing is playing until a row is tapped.
@@ -85,6 +129,24 @@ export default function App() {
   );
 
   const isHome = activeId === 'home';
+  const isLibrary = activeId === 'library';
+
+  /** Library row actions — local demo state (favorite/queue/delete/retry). */
+  const patchLibTrack = useCallback((id: string, patch: Partial<LibraryTrack>) => {
+    setLibTracks((rows) => rows.map((t) => (t.id === id ? { ...t, ...patch } : t)));
+  }, []);
+  const handleLibOpen = useCallback((id: string) => setLibCurrentId(id), []);
+  const handleLibUpload = useCallback(() => {
+    setActiveId('home');
+    addSong.openSheet();
+  }, [addSong]);
+
+  if (phase === 'onboarding') {
+    return <Onboarding onDone={handleOnboardingDone} />;
+  }
+  if (phase === 'auth') {
+    return <AuthFlow onComplete={handleAuthComplete} />;
+  }
 
   return (
     <div className={`${HARNESS_STATIC.page} ${HARNESS_CLASSES[mode].page}`}>
@@ -113,6 +175,31 @@ export default function App() {
             pending={addSong.pending}
             onSelectTrack={handleSelectTrack}
             onCancelUpload={addSong.cancelUpload}
+          />
+        ) : isLibrary ? (
+          <LibraryScreen
+            tracks={libTracks}
+            currentId={libCurrentId ?? ''}
+            playing={playing}
+            theme={mode === 'dark' ? 'night' : 'day'}
+            onOpen={handleLibOpen}
+            onUpload={handleLibUpload}
+            onFavorite={(id) =>
+              setLibTracks((rows) =>
+                rows.map((t) => (t.id === id ? { ...t, favorite: !t.favorite } : t)),
+              )
+            }
+            onQueue={(id) =>
+              patchLibTrack(
+                id,
+                libTracks.find((t) => t.id === id)?.queued ? { queued: false } : { queued: true },
+              )
+            }
+            onDelete={(id) => setLibTracks((rows) => rows.filter((t) => t.id !== id))}
+            onRetry={(id) =>
+              patchLibTrack(id, { status: 'queued', progress: 0, error: null })
+            }
+            onShare={() => {}}
           />
         ) : (
           <NavPreviewLabel activeId={activeId} counter={counter} theme={mode} />
