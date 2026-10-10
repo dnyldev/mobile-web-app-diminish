@@ -103,7 +103,7 @@ export function LibraryScreen({
   }, [tracks, query, filter]);
 
   return (
-    <div className="dlib relative flex min-h-dvh flex-1 flex-col" data-theme={theme}>
+    <div className="dlib relative flex h-full min-h-full flex-col" data-theme={theme}>
       <header className="px-5 pb-3 pt-[max(18px,calc(var(--safe-t)+14px))]">
         <div className="mt-1 flex items-end justify-between gap-3">
           <h1 className="text-[32px] font-semibold leading-none tracking-[-0.04em]">Library</h1>

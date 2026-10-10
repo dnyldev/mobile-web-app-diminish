@@ -139,6 +139,12 @@ export default function App() {
 
   const isHome = activeId === 'home';
   const isLibrary = activeId === 'library';
+  const pageClasses = isLibrary
+    ? 'h-[100dvh] w-full overflow-hidden selection:bg-black/10 transition-colors duration-300'
+    : HARNESS_STATIC.page;
+  const frameClasses = isLibrary
+    ? 'relative isolate h-full w-full overflow-hidden transition-colors duration-300'
+    : HARNESS_STATIC.frame;
 
   /** Library row actions — local demo state (favorite/queue/delete/retry). */
   const patchLibTrack = useCallback((id: string, patch: Partial<LibraryTrack>) => {
@@ -158,8 +164,10 @@ export default function App() {
   }
 
   return (
-    <div className={`${HARNESS_STATIC.page} ${HARNESS_CLASSES[mode].page}`}>
-      <div className={`${HARNESS_STATIC.frame} ${HARNESS_CLASSES[mode].frame}`}>
+    <div className={`${pageClasses} ${HARNESS_CLASSES[mode].page}`}>
+      <div
+        className={`${frameClasses} ${isLibrary ? '' : HARNESS_CLASSES[mode].frame}`}
+      >
         {/* The search view replaces the screen rather than floating over it —
             the template switches its page to it, and that is what this is. */}
         {addSong.searchOpen ? (
