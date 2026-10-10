@@ -1,10 +1,11 @@
-import { HOME_CLASSES, HOME_STATIC, TRACK_LIST } from '@/design/home';
+import { HOME_CLASSES, HOME_STATIC, TRACK_LIST, TRACK_ROW_SKELETON } from '@/design/home';
 import type { PendingUpload } from '@/data/addSong';
 import type { Track } from '@/data/tracks';
 import { useTracks } from '@/hooks/useTracks';
 import type { ThemeMode } from '@/types/theme';
 import { HomeHeader } from './HomeHeader';
 import { TrackRow } from './TrackRow';
+import { TrackRowSkeleton } from './TrackRowSkeleton';
 import { UploadRow } from './UploadRow';
 
 export interface HomeScreenProps {
@@ -100,9 +101,11 @@ export function HomeScreen({
         )}
 
         {status === 'loading' && (
-          <p className={`${HOME_STATIC.status} ${HOME_CLASSES[theme].status}`}>
-            Loading tracks…
-          </p>
+          <div className={HOME_STATIC.listWrapper}>
+            {Array.from({ length: TRACK_ROW_SKELETON.count }, (_, index) => (
+              <TrackRowSkeleton key={index} theme={theme} showDivider={index !== 0} />
+            ))}
+          </div>
         )}
 
         {status === 'error' && (

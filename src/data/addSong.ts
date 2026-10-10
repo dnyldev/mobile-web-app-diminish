@@ -23,20 +23,50 @@
  * with the panel they fed (decision: Danial — the search is the Add-song one
  * now). That panel also picked the cover colour by ROW INDEX (`En[T % En.length]`),
  * so its list repainted from the top on every keystroke; this table does not.
+ *
+ * ## The cable
+ *
+ * `searchArchive` used to filter a twelve-row table and nothing else. It now
+ * asks the archive — the backend's Melobit search (`src/api/melobit.ts`) — when
+ * a backend is configured, and falls back to that same twelve-row table when one
+ * is not. So the table below is no longer "the archive": it is the OFFLINE
+ * archive, the demo the app shows when the cable is out.
+ *
+ * What does NOT change when the cable goes in: the seed's shape. A Melobit row
+ * arrives as `ArchiveTrack` and is mapped to the very same `AddSearchSeed` the
+ * table produces — its own `m:ss` label, its own cover letter, a cover colour
+ * from the app's own `V6_GRADIENTS`. The search view cannot tell the two apart,
+ * and that is the point. The one field only a provider row can fill is
+ * `coverUrl`: Melobit's artwork, painted over the monogram, `null` on every demo
+ * row (see `components/Cover`).
  */
+import { ADD_SONG_METRICS } from '@/design/addSong';
+import { isApiConnected } from '@/api/client';
+import { addArchiveTrack, fetchArchive, type ArchiveTrack } from '@/api/melobit';
 import { V6_GRADIENTS } from './playlistV6';
-import type { Track } from './tracks';
+import { formatDuration, type Track } from './tracks';
 
 /**
- * Original `rl[i]` — one entry of the archive.
+ * One row of the search view.
  *
  * The shape is the template's, not this app's: the row draws `letter` on
  * `gradient`, the filter reads `title`/`artist`, and `duration` is carried
  * straight into the created track by `VA`.
+ *
+ * Two fields are this app's own, and both exist because the archive is now a
+ * real service rather than a fixed table:
+ *
+ *   `inLibrary`  whether the user already has the track. The backend computes
+ *                it per result, so a row can arrive already ticked.
+ *   `source`     the provider row this seed was built from, handed back verbatim
+ *                when the row is picked. `null` in demo mode, where there is
+ *                nothing to hand back to. Deliberately opaque: naming Melobit's
+ *                fields here would put the third-party shape one import away
+ *                from the UI, which is exactly what `src/api/` exists to stop.
  */
 export interface AddSearchSeed {
   /** `id` — the entry's own key. `VA` keys the spinner/✓ sets on THIS, not on the title. */
-  id: number;
+  id: string;
   title: string;
   artist: string;
   /** `duration` — the label the created row shows, e.g. `"3:42"` */
@@ -45,23 +75,101 @@ export interface AddSearchSeed {
   letter: string;
   /** `gradient` — the cover's colour, the entry's own */
   gradient: string;
+  /**
+   * The entry's real artwork, or `null`.
+   *
+   * Only a provider row has one; the twelve offline rows are gradient-only. The
+   * cover's top layer either way — it is drawn over `letter`/`gradient`, never
+   * instead of them, so an unreachable image costs the row nothing.
+   */
+  coverUrl: string | null;
+  /** Whether the user already has this track — the backend's own answer per result. */
+  inLibrary: boolean;
+  /** The provider row behind this seed, or `null` when it is a demo row. */
+  source: ArchiveTrack | null;
 }
 
-/** `rl` — the twelve tracks the view searches. */
+/**
+ * `rl` — the OFFLINE archive: the twelve rows the view searches when no backend
+ * is configured. With the cable in, the archive is Melobit and this table is
+ * only ever reached by demo mode.
+ *
+ * A demo row has no artwork to name, so `coverUrl` is injected here rather than
+ * repeated on all twelve entries — every other field still comes from the row.
+ */
+function demoSeed(
+  id: number,
+  row: Omit<AddSearchSeed, 'id' | 'inLibrary' | 'source' | 'coverUrl'>,
+): AddSearchSeed {
+  // A demo row is never owned, and there is no provider row behind it to hand back.
+  return { ...row, coverUrl: null, id: `demo-${id}`, inLibrary: false, source: null };
+}
+
 export const ADD_SEARCH_SEEDS: readonly AddSearchSeed[] = [
-  { id: 1, title: 'Bi Gharar', artist: 'Shadmehr Aghili', duration: '3:42', letter: 'B', gradient: V6_GRADIENTS[0] },
-  { id: 2, title: 'Taghdir', artist: 'Moein', duration: '4:18', letter: 'T', gradient: V6_GRADIENTS[1] },
-  { id: 3, title: 'Khooneye Arezoo', artist: 'Ebi', duration: '3:05', letter: 'K', gradient: V6_GRADIENTS[2] },
-  { id: 4, title: 'Parvaze Ghooha', artist: 'Mojtaba Daghighy', duration: '5:02', letter: 'P', gradient: V6_GRADIENTS[3] },
-  { id: 5, title: 'Neon Veil', artist: 'Lumen Field', duration: '2:57', letter: 'N', gradient: V6_GRADIENTS[4] },
-  { id: 6, title: 'Midnight Society', artist: 'Atlas Club', duration: '3:33', letter: 'M', gradient: V6_GRADIENTS[5] },
-  { id: 7, title: 'Sora Bloom', artist: 'Aether', duration: '4:47', letter: 'S', gradient: V6_GRADIENTS[6] },
-  { id: 8, title: 'Halcyon Drift', artist: 'Velvet Cove', duration: '3:21', letter: 'H', gradient: V6_GRADIENTS[7] },
-  { id: 9, title: 'Obsidian Heart', artist: 'Solaris', duration: '2:48', letter: 'O', gradient: V6_GRADIENTS[8] },
-  { id: 10, title: 'Cinder Light', artist: 'Nova Lane', duration: '4:09', letter: 'C', gradient: V6_GRADIENTS[9] },
-  { id: 11, title: 'Saffron Dusk', artist: 'Kairo', duration: '3:56', letter: 'S', gradient: V6_GRADIENTS[10] },
-  { id: 12, title: 'Crystal Loom', artist: 'Cerulean', duration: '4:33', letter: 'C', gradient: V6_GRADIENTS[11] },
-] as const;
+  demoSeed(1, { title: 'Bi Gharar', artist: 'Shadmehr Aghili', duration: '3:42', letter: 'B', gradient: V6_GRADIENTS[0] }),
+  demoSeed(2, { title: 'Taghdir', artist: 'Moein', duration: '4:18', letter: 'T', gradient: V6_GRADIENTS[1] }),
+  demoSeed(3, { title: 'Khooneye Arezoo', artist: 'Ebi', duration: '3:05', letter: 'K', gradient: V6_GRADIENTS[2] }),
+  demoSeed(4, { title: 'Parvaze Ghooha', artist: 'Mojtaba Daghighy', duration: '5:02', letter: 'P', gradient: V6_GRADIENTS[3] }),
+  demoSeed(5, { title: 'Neon Veil', artist: 'Lumen Field', duration: '2:57', letter: 'N', gradient: V6_GRADIENTS[4] }),
+  demoSeed(6, { title: 'Midnight Society', artist: 'Atlas Club', duration: '3:33', letter: 'M', gradient: V6_GRADIENTS[5] }),
+  demoSeed(7, { title: 'Sora Bloom', artist: 'Aether', duration: '4:47', letter: 'S', gradient: V6_GRADIENTS[6] }),
+  demoSeed(8, { title: 'Halcyon Drift', artist: 'Velvet Cove', duration: '3:21', letter: 'H', gradient: V6_GRADIENTS[7] }),
+  demoSeed(9, { title: 'Obsidian Heart', artist: 'Solaris', duration: '2:48', letter: 'O', gradient: V6_GRADIENTS[8] }),
+  demoSeed(10, { title: 'Cinder Light', artist: 'Nova Lane', duration: '4:09', letter: 'C', gradient: V6_GRADIENTS[9] }),
+  demoSeed(11, { title: 'Saffron Dusk', artist: 'Kairo', duration: '3:56', letter: 'S', gradient: V6_GRADIENTS[10] }),
+  demoSeed(12, { title: 'Crystal Loom', artist: 'Cerulean', duration: '4:33', letter: 'C', gradient: V6_GRADIENTS[11] }),
+];
+
+/** The offline filter — byte-for-byte the template's own, `vi`. */
+function searchDemoArchive(query: string): AddSearchSeed[] {
+  if (query.trim() === '') return [];
+
+  const needle = query.toLowerCase();
+  return ADD_SEARCH_SEEDS.filter(
+    (seed) =>
+      seed.title.toLowerCase().includes(needle) || seed.artist.toLowerCase().includes(needle),
+  );
+}
+
+/**
+ * The cover colour for an archive row, derived from its id.
+ *
+ * Melobit sends `coverUrl` too, and that artwork is now drawn — but as the
+ * cover's TOP layer, over this colour. So the colour is still derived here: it
+ * is what the row shows while the image travels, if it never arrives, and if
+ * the backend ever answers without one. Same table the library cable uses, but
+ * hashed from a STRING id, so a given track keeps one colour across reloads and
+ * two rows with similar titles cannot collide on an index.
+ */
+function gradientForArchiveId(id: string): string {
+  let hash = 5381;
+  for (let index = 0; index < id.length; index += 1) {
+    hash = ((hash << 5) + hash + id.charCodeAt(index)) >>> 0;
+  }
+  return V6_GRADIENTS[hash % V6_GRADIENTS.length];
+}
+
+/**
+ * A Melobit row as the search view's own row.
+ *
+ * The mirror of `tracks.ts`'s `toTrackFromSong`, and the same rules: the API's
+ * seconds become the app's `m:ss`, its title decides the cover letter, and the
+ * cover colour comes from the app's own table. The provider row rides along in
+ * `source` so picking the row can hand it straight back.
+ */
+export function toSearchSeed(track: ArchiveTrack): AddSearchSeed {
+  return {
+    id: track.id,
+    title: track.title,
+    artist: track.artist,
+    duration: formatDuration(track.duration),
+    letter: coverLetterFor(track.title),
+    gradient: gradientForArchiveId(track.id),
+    coverUrl: track.coverUrl || null,
+    inLibrary: track.inLibrary,
+    source: track,
+  };
+}
 
 /**
  * `vi` — the filtered archive, and the ONE function the search view reads.
@@ -80,15 +188,31 @@ export const ADD_SEARCH_SEEDS: readonly AddSearchSeed[] = [
  * an oversight: the emptiness test uses the TRIMMED query while the match uses
  * the raw one (so `" bi"` finds nothing), and the list is NOT capped — the Add
  * music panel's "first six / max eight" belonged to that panel.
+ *
+ * Now async, and that is the only change to its contract: with a backend
+ * configured it asks Melobit through it, and without one it runs the original
+ * filter synchronously under a resolved promise. It does NOT swallow a failed
+ * search — a service that is down is not an empty result, and the view has a
+ * state for it.
  */
-export function searchArchive(query: string): AddSearchSeed[] {
+export async function searchArchive(
+  query: string,
+  signal?: AbortSignal,
+): Promise<AddSearchSeed[]> {
   if (query.trim() === '') return [];
 
-  const needle = query.toLowerCase();
-  return ADD_SEARCH_SEEDS.filter(
-    (seed) =>
-      seed.title.toLowerCase().includes(needle) || seed.artist.toLowerCase().includes(needle),
-  );
+  if (!isApiConnected()) return searchDemoArchive(query);
+
+  const tracks = await fetchArchive(query, signal);
+  return tracks.map(toSearchSeed);
+}
+
+/**
+ * The cover letter, matching `tracks.ts`'s own rule: the first character of the
+ * title, uppercased, `'A'` when there is nothing to take.
+ */
+function coverLetterFor(title: string): string {
+  return title.trim()[0]?.toUpperCase() || 'A';
 }
 
 /** Original: `En[Math.floor(Math.random() * En.length)]` */
@@ -167,6 +291,9 @@ export function buildPendingUpload(fileName: string): PendingUpload {
  *
  * Two adaptations, both mechanical: the original's `id` is a string and this
  * app's is a number, and `seconds` is derived from the label it just rolled.
+ *
+ * No artwork: the file came off the device and nothing read its tags, so the
+ * committed row keeps the monogram its upload row already showed.
  */
 export function commitPendingUpload(pending: PendingUpload): Track {
   const duration = randomDurationLabel();
@@ -179,29 +306,60 @@ export function commitPendingUpload(pending: PendingUpload): Track {
     duration,
     letter: pending.letter,
     gradient: pending.gradient,
+    coverUrl: null,
   };
 }
 
 /**
- * A picked search result, as a row. Original `VA` (5108-5127):
+ * A picked search result, as a library row. Original `VA` (5108-5127):
  *
  *   id       = Date.now().toString() + m.id   — the entry's own id appended, so
- *              two picks can never collide. This app's `Track.id` is a number, so
- *              it ADDS the entry's 1-12 index instead of concatenating it: the
- *              same guarantee, one type.
+ *              two picks can never collide.
  *   artist   = m.artist    — the entry's artist, verbatim (no suffix is added)
  *   duration = m.duration  — the entry's own label
  *   letter   = m.letter    — taken from the entry, not re-derived from the title
  *   gradient = m.gradient  — the entry's own cover colour
+ *   coverUrl = m.coverUrl  — the entry's own artwork, so the row shows the real
+ *                            cover the instant it lands, without waiting for the
+ *                            library to re-fetch the record it just created.
+ *
+ * `id` is now a PARAMETER rather than something derived here, and that is the
+ * consequence of the cable: with a backend the id is the created song's own
+ * database id, so the row that lands in the list is the same record the library
+ * would return — not a look-alike optimistically invented on the client. The
+ * demo path passes `Date.now()`, which is all it ever had.
  */
-export function buildSearchTrack(seed: AddSearchSeed): Track {
+export function buildSearchTrack(seed: AddSearchSeed, id: number): Track {
   return {
-    id: Date.now() + seed.id,
+    id,
     title: seed.title,
     artist: seed.artist,
     seconds: durationSeconds(seed.duration),
     duration: seed.duration,
     letter: seed.letter,
     gradient: seed.gradient,
+    coverUrl: seed.coverUrl,
   };
+}
+
+/**
+ * Add a picked row to the library.
+ *
+ * With a backend: the real `POST /api/melobit/add`, which downloads the whole
+ * file server-side before it answers and resolves with the created song's id.
+ * It is slow by nature and can genuinely fail, so it REJECTS with the backend's
+ * own error and leaves it to the caller to show — a failed add is not an added
+ * track.
+ *
+ * Without one: the demo, holding the artifact's own 900ms so the spinner the
+ * view draws is still the spinner it drew before. Nothing is uploaded and the
+ * id is synthetic, which is exactly what demo mode means.
+ */
+export async function addSeedToLibrary(seed: AddSearchSeed): Promise<number> {
+  if (!seed.source) {
+    await new Promise((resolve) => setTimeout(resolve, ADD_SONG_METRICS.searchAddMs));
+    return Date.now();
+  }
+
+  return addArchiveTrack(seed.source);
 }

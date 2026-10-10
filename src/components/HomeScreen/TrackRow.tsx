@@ -1,3 +1,4 @@
+import { Cover } from '@/components/Cover';
 import type { Track } from '@/data/tracks';
 import { HOME_CLASSES, HOME_STATIC, HOME_COLORS, TRACK_LIST } from '@/design/home';
 import type { ThemeMode } from '@/types/theme';
@@ -46,11 +47,13 @@ export function TrackRow({ track, showDivider, theme, onSelect }: TrackRowProps)
         onClick={() => onSelect(track)}
       >
         <div className={`${HOME_STATIC.row} ${HOME_CLASSES[theme].row}`}>
-          <div className={HOME_STATIC.cover} style={{ background: track.gradient }}>
-            <div className={HOME_STATIC.coverInner}>
-              <span className={HOME_STATIC.letter}>{track.letter}</span>
-            </div>
-          </div>
+          <Cover
+            gradient={track.gradient}
+            letter={track.letter}
+            coverUrl={track.coverUrl}
+            className={HOME_STATIC.cover}
+            letterClassName={HOME_STATIC.letter}
+          />
 
           <div className={HOME_STATIC.textBlock}>
             <div className={`${HOME_STATIC.trackTitle} ${HOME_CLASSES[theme].trackTitle}`}>

@@ -104,8 +104,43 @@ export const HOME_STATIC = {
   /** original duration: `text-[13px] tabular-nums tracking-[-0.01em] min-w-[36px] text-right` */
   duration: 'text-[13px] tabular-nums tracking-[-0.01em] min-w-[36px] text-right',
 
-  /** loading / error note — no counterpart in the original, which had no async data */
+  /** error note — no counterpart in the original, which had no async data. The
+   *  loading state is the skeleton list below, not a note. */
   status: 'px-6 py-12 text-center text-[13px]',
+} as const;
+
+/**
+ * The library's loading row: `TrackRow`'s own geometry, greyed out.
+ *
+ * The list used to say "Loading tracks…" in the middle of the screen, while the
+ * search view drew skeleton rows — the same wait, told two different ways. This
+ * is the search view's idiom (`ADD_SONG_CLASS.searchSkeleton*`) expressed in
+ * this screen's tokens, so the wait reads as the row that is arriving rather
+ * than as an announcement.
+ *
+ * The bars are sized from the row they stand in for — 48px cover, 15px title
+ * line, 13px artist line, the 36px duration column — and the rows themselves
+ * compose `HOME_STATIC.rowShell` / `HOME_STATIC.row`, so a skeleton and the
+ * track that replaces it cannot be different heights.
+ *
+ * No colour of its own: the fill is `HOME_COLORS[theme].divider`, the hairline
+ * this screen already draws between rows.
+ */
+export const TRACK_ROW_SKELETON = {
+  /**
+   * How many rows stand in for the catalogue.
+   *
+   * The frame is `min-h-[720px]` under a 64px header, so eight rows fill the
+   * visible list without the skeleton scrolling.
+   */
+  count: 8,
+  cover: 'w-12 h-12 rounded-[10px] shrink-0 animate-pulse',
+  /** the text column's own stack: two bars where the title and artist go */
+  textBlock: 'flex-1 min-w-0 ml-3 flex flex-col gap-2',
+  barTitle: 'h-4 w-32 rounded-full animate-pulse',
+  barSub: 'h-3 w-20 rounded-full animate-pulse',
+  /** the trailing column, where a real row prints its `m:ss` */
+  barDuration: 'h-3 w-[36px] rounded-full animate-pulse',
 } as const;
 
 /** Per-mode class strings, verbatim from the original ternaries. */

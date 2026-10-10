@@ -414,6 +414,25 @@ npm run preview      # serve the built file
 (`vite-plugin-singlefile`, `assetsInlineLimit` raised, relative `base`) — the same
 shape as the artifact it replaces, but readable and rebuildable.
 
+## Docker
+
+```bash
+docker build -t diminish-ui .                                    # offline/demo bundle
+docker build --build-arg VITE_API_BASE_URL=http://192.168.1.10:3000 -t diminish-ui .  # backend baked in
+
+# this machine only:
+docker run --rm -p 127.0.0.1:8080:80 diminish-ui                 # -> http://127.0.0.1:8080
+
+# phone / LAN (binds all interfaces; open the HOST's LAN IP on the phone):
+docker run --rm -p 8080:80 diminish-ui                          # -> http://<host-LAN-IP>:8080
+```
+
+`VITE_API_BASE_URL` is baked into the bundle at build time (empty = demo
+catalogue); a container env var cannot change it afterwards. For phone access
+it must be a URL the phone itself can reach — the phone's `localhost` is the
+phone, not this machine, so use this machine's LAN IP (e.g.
+`http://192.168.1.10:3000`). Never put secrets in `VITE_*`.
+
 ## Fidelity notes
 
 * **Home indicator removed — deliberate deviation.** The original drew a 120×5

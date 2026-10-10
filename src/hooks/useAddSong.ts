@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ChangeEvent, RefObject } from 'react';
 import { ADD_SONG_COPY, ADD_SONG_METRICS } from '@/design/addSong';
 import {
+  addSeedToLibrary,
   buildPendingUpload,
   buildSearchTrack,
   commitPendingUpload,
@@ -28,14 +29,23 @@ export interface AddSongController {
   results: AddSearchSeed[];
   /** `Q` — the 600ms debounce is running, i.e. the skeletons are up. */
   searching: boolean;
+  /**
+   * The archive refusing to answer, or `null`.
+   *
+   * Not in the artifact: it had one fixed table that could not fail. The
+   * archive is a separate service now, so "down" and "no matches" are different
+   * things and the view draws them differently. Holds the provider's own
+   * message, for the console.
+   */
+  searchError: string | null;
   /** `W` — the hidden `input[type=file]`. */
   fileInputRef: RefObject<HTMLInputElement>;
   /** `n` — the row a chosen file is uploading into, or `null`. */
   pending: PendingUpload | null;
   /** `R` — results whose track is being committed, i.e. showing the spinner. Keyed by the entry's own id. */
-  addingIds: ReadonlySet<number>;
+  addingIds: ReadonlySet<string>;
   /** `B` — results that have just landed, i.e. showing the ✓. */
-  savedIds: ReadonlySet<number>;
+  savedIds: ReadonlySet<string>;
 
   openSheet: () => void;
   closeSheet: () => void;
@@ -108,12 +118,14 @@ export function useAddSong({ onAdd }: UseAddSongOptions): AddSongController {
   const [results, setResults] = useState<AddSearchSeed[]>([]);
   /** `Q` */
   const [searching, setSearching] = useState(false);
+  /** this app's own — see `searchError` on the controller */
+  const [searchError, setSearchError] = useState<string | null>(null);
   /** `n` */
   const [pending, setPending] = useState<PendingUpload | null>(null);
   /** `R` */
-  const [addingIds, setAddingIds] = useState<ReadonlySet<number>>(new Set());
+  const [addingIds, setAddingIds] = useState<ReadonlySet<string>>(new Set());
   /** `B` */
-  const [savedIds, setSavedIds] = useState<ReadonlySet<number>>(new Set());
+  const [savedIds, setSavedIds] = useState<ReadonlySet<string>>(new Set());
 
   /** `W` */
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -178,24 +190,60 @@ export function useAddSong({ onAdd }: UseAddSongOptions): AddSongController {
    *   return () => clearTimeout(m)
    *
    * A blank query clears the list and drops the flag at once — no skeletons for
-   * an empty field. Anything else raises the flag, and the filter runs only when
+   * an empty field. Anything else raises the flag, and the search runs only when
    * the typing settles; a keystroke inside the 600ms replaces the pending timer
    * rather than adding to it, so the list is never filtered mid-word.
+   *
+   * The timer is still the artifact's. What changed is what it fires: the
+   * archive is a network call now, so the effect owns an `AbortController` too —
+   * a keystroke cancels the request as well as the timer, and an answer to a
+   * superseded query can never land on the list. The archive is also the one
+   * place in this app that answers slowly (the backend's Melobit search re-reads
+   * a large upstream payload), so `searching` covering the whole round trip is
+   * the difference between skeletons and a frozen field.
    */
   useEffect(() => {
     if (query.trim() === '') {
       setResults([]);
       setSearching(false);
+      setSearchError(null);
       return;
     }
 
+    const controller = new AbortController();
     setSearching(true);
+
     const id = window.setTimeout(() => {
-      setResults(searchArchive(query));
-      setSearching(false);
+      searchArchive(query, controller.signal)
+        .then((seeds) => {
+          if (controller.signal.aborted) return;
+
+          setResults(seeds);
+          setSearchError(null);
+          // Rows the backend says we already own arrive ticked — that is its
+          // answer, not a guess, so it persists past the ✓'s own 1500ms.
+          setSavedIds((current) => {
+            const next = new Set(current);
+            for (const seed of seeds) if (seed.inLibrary) next.add(seed.id);
+            return next;
+          });
+        })
+        .catch((cause: unknown) => {
+          if (controller.signal.aborted) return;
+
+          setResults([]);
+          setSearchError(cause instanceof Error ? cause.message : String(cause));
+          console.warn('[diminish] archive search failed', cause);
+        })
+        .finally(() => {
+          if (!controller.signal.aborted) setSearching(false);
+        });
     }, ADD_SONG_METRICS.searchDebounceMs);
 
-    return () => window.clearTimeout(id);
+    return () => {
+      window.clearTimeout(id);
+      controller.abort();
+    };
   }, [query]);
 
   /** `pf` — close the sheet, then the search view takes the screen. */
@@ -275,7 +323,18 @@ export function useAddSong({ onAdd }: UseAddSongOptions): AddSongController {
     [commitUpload, later, stopTicking],
   );
 
-  /** `vf` — the artifact's `VA`: spinner, then ✓, and the track lands at 900ms. */
+  /**
+   * `vf` — the artifact's `VA`: spinner, then ✓, and the track lands when the
+   * add finishes.
+   *
+   * The shape is the artifact's; the clock is not. It used to be one
+   * `setTimeout(…, 900)` because the "add" was a fiction — nothing was fetched,
+   * so 900ms was as good as any number. It is a real request now (the backend
+   * downloads the file before it answers), so the same three steps ride on the
+   * promise instead: spinner while it is in flight, ✓ with the track when it
+   * resolves, `+` back with a toast when it rejects. A failure is deliberately
+   * NOT a ✓: an entry that could not be added must stay addable.
+   */
   const pickResult = useCallback(
     (seed: AddSearchSeed) => {
       const key = seed.id;
@@ -283,30 +342,40 @@ export function useAddSong({ onAdd }: UseAddSongOptions): AddSongController {
 
       setAddingIds((current) => new Set(current).add(key));
 
-      later(() => {
+      const clearAdding = () =>
         setAddingIds((current) => {
           const next = new Set(current);
           next.delete(key);
           return next;
         });
-        setSavedIds((current) => new Set(current).add(key));
 
-        onAdd(buildSearchTrack(seed));
-        setToast(`${seed.title}${ADD_SONG_COPY.addedSuffix}`);
-        try {
-          navigator.vibrate?.([10, 30, 10]);
-        } catch {
-          // see `commitUpload`
-        }
+      addSeedToLibrary(seed)
+        .then((id) => {
+          clearAdding();
+          setSavedIds((current) => new Set(current).add(key));
 
-        later(() => {
-          setSavedIds((current) => {
-            const next = new Set(current);
-            next.delete(key);
-            return next;
-          });
-        }, ADD_SONG_METRICS.searchAddedMs);
-      }, ADD_SONG_METRICS.searchAddMs);
+          onAdd(buildSearchTrack(seed, id));
+          setToast(`${seed.title}${ADD_SONG_COPY.addedSuffix}`);
+          try {
+            navigator.vibrate?.([10, 30, 10]);
+          } catch {
+            // see `commitUpload`
+          }
+
+          later(() => {
+            setSavedIds((current) => {
+              const next = new Set(current);
+              next.delete(key);
+              return next;
+            });
+          }, ADD_SONG_METRICS.searchAddedMs);
+        })
+        .catch((cause: unknown) => {
+          // Back to `+`, so the row can be tried again.
+          clearAdding();
+          setToast(ADD_SONG_COPY.addFailedToast);
+          console.warn('[diminish] could not add from the archive', cause);
+        });
     },
     [addingIds, later, onAdd, savedIds],
   );
@@ -319,6 +388,7 @@ export function useAddSong({ onAdd }: UseAddSongOptions): AddSongController {
     query,
     results,
     searching,
+    searchError,
     fileInputRef,
     pending,
     addingIds,

@@ -1,3 +1,4 @@
+import { Cover } from '@/components/Cover';
 import { MiniCloseGlyph, MiniPauseGlyph, MiniPlayGlyph } from '@/components/PlaylistV6/icons';
 import { THEME } from '@/design/theme';
 import type { ThemeMode } from '@/design/theme';
@@ -50,9 +51,12 @@ export function MiniPlayer({ track, isPlaying, theme, onTogglePlay, onClose }: M
         animation: MINI_PLAYER.entrance,
       }}
     >
-      <div className={MINI_PLAYER.cover} style={{ background: track.gradient }}>
-        {track.letter}
-      </div>
+      <Cover
+        gradient={track.gradient}
+        letter={track.letter}
+        coverUrl={track.coverUrl}
+        className={MINI_PLAYER.cover}
+      />
 
       <div className={MINI_PLAYER.textBlock}>
         <div className={`${MINI_PLAYER.title} ${palette.miniTitle}`}>{track.title}</div>

@@ -97,6 +97,7 @@ export default function App() {
             query={addSong.query}
             results={addSong.results}
             searching={addSong.searching}
+            searchError={addSong.searchError}
             addingIds={addSong.addingIds}
             savedIds={addSong.savedIds}
             onQueryChange={addSong.setQuery}

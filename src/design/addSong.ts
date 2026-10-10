@@ -446,6 +446,24 @@ export const ADD_SONG_COPY = {
   searchNoResultsPrefix: 'No results for "',
   searchNoResultsSuffix: '"',
   searchNoResultsSub: 'Try a different search term',
+
+  /**
+   * The archive failing to answer.
+   *
+   * NOT template copy: the template's archive was a fixed table that could not
+   * fail, so it drew one "nothing found" state and nothing else. The archive is
+   * a service of its own now, and "it is down" is not "there are no matches" —
+   * the second tells the user to try another word, the first would be a lie.
+   * Persian because this view's two empty states above are the template's
+   * English, but this state is this app's own, next to the uploading row's ✕.
+   *
+   * The provider's message is NOT shown: it is a status line and a code
+   * (`MELOBIT_UNREACHABLE`), useful in the console and noise on a 13.5px line.
+   */
+  searchErrorTitle: 'آرشیو در دسترس نیست',
+  searchErrorSub: 'سرور جست‌وجو پاسخ نمی‌دهد — بعداً دوباره امتحان کن',
+  /** The toast after a picked row fails to add. Same reasoning as above. */
+  addFailedToast: 'افزودن ناموفق بود',
   /**
    * The two icon-only buttons in the view. Not template copy — the template gave
    * neither a label — so they are this app's own, in the same Persian as the

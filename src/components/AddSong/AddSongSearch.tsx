@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { Cover } from '@/components/Cover';
 import { ADD_SONG_CLASS, ADD_SONG_COPY, ADD_SONG_METRICS, ADD_SONG_THEME } from '@/design/addSong';
 import type { AddSearchSeed } from '@/data/addSong';
 import type { ThemeMode } from '@/types/theme';
@@ -13,10 +14,12 @@ export interface AddSongSearchProps {
   results: AddSearchSeed[];
   /** `Q` */
   searching: boolean;
+  /** The archive's own failure, or `null` — this app's state, not the template's. */
+  searchError: string | null;
   /** `R` — rows keyed by their entry's own id. */
-  addingIds: ReadonlySet<number>;
+  addingIds: ReadonlySet<string>;
   /** `B` */
-  savedIds: ReadonlySet<number>;
+  savedIds: ReadonlySet<string>;
   onQueryChange: (value: string) => void;
   /** the back button — the artifact's `t("library"), s("")` */
   onClose: () => void;
@@ -32,24 +35,36 @@ export interface AddSongSearchProps {
  * the row closes the drawer and swaps the page (`F(!1), t("search"), s("")`), and
  * that is how it renders here — where `HomeScreen` renders, inside the frame.
  *
- * Its four states are all the template's, in its own order:
+ * Its states are the template's, in its own order, plus one the template could
+ * not have had:
  *
  *   blank query   the 72px disc with a 32px `Search` glyph at `strokeWidth 1.6`,
  *                 `No recent searches`, and `Start typing to find tracks`. The
  *                 template's `TRENDING NOW` block — its label, the five `trending`
  *                 entries it flagged and the three hard-coded artists — is NOT
  *                 ported (decision: Danial): that option is not wanted there.
- *   searching     three skeleton rows while the hook's 600ms debounce runs.
+ *   searching     three skeleton rows while the hook's 600ms debounce runs — and
+ *                 now for the whole round trip, since the archive answers over
+ *                 the network.
  *   results       the 72px rows: a 52px `rounded-[14px]` cover (the entry's OWN
- *                 gradient and letter), a `truncate` title over a `#8E8E93`
+ *                 gradient and letter, with the provider's artwork over them
+ *                 when the entry has one), a `truncate` title over a `#8E8E93`
  *                 artist, the 32px add disc, and a 1px divider inset to
  *                 `left-[72px]`.
- *   no matches    a 64px disc with a 28px `Music2` glyph, `No results for "<what
- *                 you typed>"`, and `Try a different search term`.
+ *   archive down  a 64px disc with a 28px `Close` glyph. NOT the template's: its
+ *                 archive was a fixed table, so `No results` was the only thing
+ *                 that could go wrong. This app's archive is a service, and a
+ *                 service that is down is not a search that found nothing — the
+ *                 block is the no-results one's own, on its own copy.
+ *   no matches    the same 64px disc with a 28px `Music2` glyph instead,
+ *                 `No results for "<what you typed>"`, and `Try a different
+ *                 search term`.
  *
  * The add disc's three glyphs are `+`, the spinner, then the ✓ — and only the
  * GLYPH changes: the disc keeps its idle paint until the row is actually added,
- * which is what the template drew.
+ * which is what the template drew. An add that FAILS returns the disc to `+`
+ * (with the toast saying so), because a row that could not be added must stay
+ * addable — the template had no such case, having nothing to fail.
  *
  * The Add music artifact's floating panel (its `z-[70]` blur backdrop, its 44px
  * field with a 14px `r="6"` search glyph, its `max-h-[360px]` list, its results
@@ -60,6 +75,7 @@ export function AddSongSearch({
   query,
   results,
   searching,
+  searchError,
   addingIds,
   savedIds,
   onQueryChange,
@@ -172,6 +188,26 @@ export function AddSongSearch({
               </div>
             ))}
           </div>
+        ) : searchError ? (
+          /* The archive is a service, and it can be down. The template's own
+             table could not fail, so this block is its no-results one with the
+             `Close` glyph and this app's own copy — no new classes, no new
+             geometry. */
+          <div className={ADD_SONG_CLASS.searchNoResults}>
+            <div className={`${ADD_SONG_CLASS.searchNoResultsDisc} ${palette.searchSurface}`}>
+              <CloseGlyph
+                size={ADD_SONG_METRICS.searchNoResultsGlyphSize}
+                className={palette.searchInk}
+              />
+            </div>
+
+            <div className={ADD_SONG_CLASS.searchNoResultsTitle}>
+              {ADD_SONG_COPY.searchErrorTitle}
+            </div>
+            <div className={`${ADD_SONG_CLASS.searchNoResultsSub} ${palette.searchInk}`}>
+              {ADD_SONG_COPY.searchErrorSub}
+            </div>
+          </div>
         ) : results.length > 0 ? (
           <div className={ADD_SONG_CLASS.searchResults}>
             {results.map((seed) => {
@@ -184,22 +220,19 @@ export function AddSongSearch({
                   className={`${ADD_SONG_CLASS.searchResultRow} ${palette.searchRoot}`}
                   style={{ height: `${ADD_SONG_METRICS.searchRowHeight}px` }}
                 >
-                  <div
+                  <Cover
+                    gradient={seed.gradient}
+                    letter={seed.letter}
+                    coverUrl={seed.coverUrl}
                     className={ADD_SONG_CLASS.searchResultCover}
                     style={{
                       width: `${ADD_SONG_METRICS.searchCoverSize}px`,
                       height: `${ADD_SONG_METRICS.searchCoverSize}px`,
                       borderRadius: `${ADD_SONG_METRICS.searchCoverRadius}px`,
-                      background: seed.gradient,
                     }}
-                  >
-                    <span
-                      className={ADD_SONG_CLASS.searchResultLetter}
-                      style={{ fontSize: `${ADD_SONG_METRICS.searchCoverLetterSize}px` }}
-                    >
-                      {seed.letter}
-                    </span>
-                  </div>
+                    letterClassName={ADD_SONG_CLASS.searchResultLetter}
+                    letterStyle={{ fontSize: `${ADD_SONG_METRICS.searchCoverLetterSize}px` }}
+                  />
 
                   <div className={ADD_SONG_CLASS.searchResultBody}>
                     <div
