@@ -14,6 +14,8 @@
     "artifact:format": "python3 tools/jsformat2.py _extract/script-01.js _extract/script-01.fmt2.js"
   },
   "dependencies": {
+    "framer-motion": "^14.1.0",
+    "lucide-react": "^1.55.0",
     "react": "18.3.1",
     "react-dom": "18.3.1"
   },
